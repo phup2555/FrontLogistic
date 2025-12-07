@@ -1,111 +1,208 @@
-import React, { useState, useRef } from "react";
-import { Modal, Form, Input, DatePicker, Button, message } from "antd";
-import dayjs from "dayjs";
-import { AddPdData } from "../service/Service";
+import React, { useState, useEffect } from "react";
+import {
+  AddPdData,
+  getZone,
+  getRow,
+  getCheckEmtrpSlot,
+} from "../service/Service";
 import Swal from "sweetalert2";
 
 export default function AddStock({ fetchPdData }) {
   const baseurl = "http://localhost:4000/public";
+
+  // state เปิด/ปิด modal
   const [visible, setVisible] = useState(false);
+
+  // state ขณะ loading ตอนกดบันทึก
   const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm();
+
+  // state ฟอร์มข้อมูลของพัสดุ
   const [data, setData] = useState({
     name: "",
     Cus_no_box: "",
+    store: "",
+    zone: "",
+    row: "",
+    slot: "",
     Sbox: "",
     Doc: "",
-    store: "",
   });
+
+  // ตัวเลือกห้องแบบ fix
+  const [rooms] = useState([
+    { id: "4", name: "01" },
+    { id: "5", name: "02" },
+    { id: "6", name: "03" },
+  ]);
+
+  // state zones, rows, slots ดึงจาก API
+  const [zones, setZones] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [slots, setSlots] = useState([]);
+
+  // เปิด modal
   const handleOpen = () => setVisible(true);
+
+  // ปิด modal + reset form
   const handleClose = () => {
     setVisible(false);
-    form.resetFields();
+    setData({
+      name: "",
+      Cus_no_box: "",
+      store: "",
+      zone: "",
+      row: "",
+      slot: "",
+      Sbox: "",
+      Doc: "",
+    });
+
+    // reset dropdown ทั้งหมด
+    setZones([]);
+    setRows([]);
+    setSlots([]);
   };
 
-  const handlePrint = (barcodeUrl) => {
-    // สร้าง iframe ซ่อนไว้สำหรับพิมพ์
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    document.body.appendChild(iframe);
+  // -------------------------------------------
+  // เมื่อเลือกห้อง store → ไป fetch zones
+  // -------------------------------------------
+  useEffect(() => {
+    if (data.store) {
+      // ดึง zone ตาม room
+      getZone(data.store)
+        .then((res) => setZones(res.data))
+        .catch(() => setZones([]));
 
-    const iframeDoc = iframe.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write(`
-      <html>
-        <head>
-          <title>Print Barcode</title>
-          <style>
-            body { 
-              text-align: center; 
-              margin-top: 50px; 
-            }
-            img { 
-              width: 800px;
-              height: auto;
-            }
-          </style>
-        </head>
-        <body>
-          <img src="${barcodeUrl}" alt="Barcode" />
-        </body>
-      </html>
-    `);
-    iframeDoc.close();
+      // reset ค่าที่อยู่ภายใต้ห้อง
+      setData((prev) => ({ ...prev, zone: "", row: "", slot: "", Sbox: "" }));
+      setRows([]);
+      setSlots([]);
+    } else {
+      // ถ้าเคลียร์ห้อง → reset ทุกอย่าง
+      setZones([]);
+      setRows([]);
+      setSlots([]);
+      setData((prev) => ({ ...prev, zone: "", row: "", slot: "", Sbox: "" }));
+    }
+  }, [data.store]);
 
-    // รอให้รูปภาพโหลดเสร็จก่อนพิมพ์
-    iframe.contentWindow.onload = () => {
-      setTimeout(() => {
-        iframe.contentWindow.print();
-        // ลบ iframe หลังจากพิมพ์เสร็จ
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      }, 500);
-    };
+  // -------------------------------------------
+  // เมื่อเลือก zone → ไป fetch rows
+  // -------------------------------------------
+  useEffect(() => {
+    if (data.zone) {
+      getRow(data.zone)
+        .then((res) => setRows(res.data))
+        .catch(() => setRows([]));
+
+      // reset ค่าภายใต้ zone
+      setData((prev) => ({ ...prev, row: "", slot: "", Sbox: "" }));
+      setSlots([]);
+    } else {
+      setRows([]);
+      setSlots([]);
+      setData((prev) => ({ ...prev, row: "", slot: "", Sbox: "" }));
+    }
+  }, [data.zone]);
+
+  // -------------------------------------------
+  // เมื่อเลือก row → fetch slot ว่าง
+  // -------------------------------------------
+  useEffect(() => {
+    if (data.row && data.store && data.zone) {
+      getCheckEmtrpSlot(data.store, data.zone, data.row)
+        .then((res) => setSlots(res.data))
+        .catch(() => setSlots([]));
+
+      setData((prev) => ({ ...prev, slot: "", Sbox: "" }));
+    } else {
+      setSlots([]);
+      setData((prev) => ({ ...prev, slot: "", Sbox: "" }));
+    }
+  }, [data.row]);
+
+  // -------------------------------------------
+  // auto-generate Sbox เมื่อเลือก slot
+  // เช่น 01A102 → ห้อง + zone + row + slot
+  // -------------------------------------------
+  useEffect(() => {
+    if (data.store && data.zone && data.row && data.slot) {
+      const roomName = rooms.find((r) => r.id === data.store)?.name || "";
+      const zoneName = zones.find((z) => z.zone === data.zone)?.zone || "";
+      const sbox = `${roomName}${zoneName}${data.row}${data.slot}`;
+
+      setData((prev) => ({ ...prev, Sbox: sbox }));
+    }
+  }, [data.slot]);
+
+  // ฟังก์ชันเปลี่ยนค่าฟอร์ม
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (values) => {
+  // -------------------------------------------
+  // Submit ฟอร์ม → AddPdData → print barcode
+  // -------------------------------------------
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      setLoading(true);
       const res = await AddPdData(data);
-      message.success("ເພີ່ມຂໍ້ມູນສຳເລັດ!");
-      handleClose();
+
+      Swal.fire({
+        title: "Success",
+        text: "ເພີ່ມຂໍ້ມູນສຳເລັດ!",
+        icon: "success",
+      });
+
+      // refresh data ใน table
       fetchPdData();
 
-      if (res && res.barcode) {
-        Swal.fire({
+      // ปิด modal
+      handleClose();
+
+      // ถ้ามี barcode ให้เลือกพิมพ์
+      if (res?.barcode) {
+        const printConfirm = await Swal.fire({
           title: "ສຳເລັດ",
-          text: "ທ່ານຕ້ອงການພິມ Barcode ຫຼື ບໍ່?",
+          text: "ທ່ານຕ້ອງການພິມ Barcode ຫຼື ບໍ່?",
           icon: "question",
           showCancelButton: true,
           confirmButtonText: "ພິມ",
           cancelButtonText: "ຍົກເລີກ",
-          buttonsStyling: false, // ปิด style default ของ Swal2
-          didOpen: () => {
-            // ปรับ container popup
-            const popup = document.querySelector(".swal2-popup");
-            popup.className =
-              "swal2-popup bg-white shadow-2xl rounded-xl p-6 w-96 max-w-full";
-            const footer = document.querySelector(".swal2-actions");
-            footer.className = "swal2-actions flex justify-between w-full mt-6";
-            const confirmBtn = document.querySelector(".swal2-confirm");
-            const cancelBtn = document.querySelector(".swal2-cancel");
-
-            confirmBtn.className =
-              "swal2-confirm bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors";
-            cancelBtn.className =
-              "swal2-cancel bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors";
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-            const barcodeUrl = `${baseurl}${res.barcode}`;
-            handlePrint(barcodeUrl);
-          }
         });
+
+        // ถ้ากดพิมพ์
+        if (printConfirm.isConfirmed) {
+          const barcodeUrl = `${baseurl}${res.barcode}`;
+
+          // สร้าง iframe เพื่อเปิดภาพแล้ว print ทันที
+          const iframe = document.createElement("iframe");
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+
+          const doc = iframe.contentWindow.document;
+          doc.open();
+          doc.write(
+            `<html><body class="text-center mt-12"><img src="${barcodeUrl}" class="w-[800px] h-auto" /></body></html>`
+          );
+          doc.close();
+
+          iframe.contentWindow.onload = () => {
+            iframe.contentWindow.print();
+            document.body.removeChild(iframe);
+          };
+        }
       }
-    } catch (error) {
-      console.error("Error adding stock:", error);
-      message.error("ບັນທຶກຂໍ້ມູນບໍ່ສຳເລັດ");
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        title: "Error",
+        text: "ບັນທຶກຂໍ້ມູນບໍ່ສຳເລັດ",
+        icon: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -113,82 +210,168 @@ export default function AddStock({ fetchPdData }) {
 
   return (
     <>
-      <Button
-        type="primary"
-        style={{ backgroundColor: "#928E85", borderColor: "#928E85" }}
+      <button
+        className="px-4 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-700 transition"
         onClick={handleOpen}
       >
         + ເພີ່ມພັດສະດຸ
-      </Button>
+      </button>
 
-      <Modal
-        title="ເພີ່ມຂໍ້ມູນພັດສະດຸ"
-        open={visible}
-        onCancel={handleClose}
-        footer={null}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          onValuesChange={(_, allValues) => setData({ ...data, ...allValues })}
-          className="mt-2"
-        >
-          <Form.Item
-            label="ຊື່ລູກຄ້າ"
-            name="name"
-            rules={[{ required: true, message: "ກະລຸນາໃສ່ຊື່ລູກຄ້າ" }]}
-          >
-            <Input placeholder="ຊື່ລູກຄ້າ..." />
-          </Form.Item>
+      {visible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-gray-100 p-8 rounded-xl w-96 shadow-xl">
+            <h3 className="text-center text-xl font-semibold mb-6">
+              ເພີ່ມຂໍ້ມູນພັດສະດຸ
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block mb-1">ຊື່ລູກຄ້າ</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={data.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="ຊື່ລູກຄ້າ..."
+                />
+              </div>
 
-          <Form.Item
-            label="ເລກພັດສະດຸ (No Box)"
-            name="Cus_no_box"
-            rules={[{ required: true, message: "ກະລຸນາໃສ່ເລກພັດສະດຸ" }]}
-          >
-            <Input placeholder="ເຊັ່ນ BOX001" />
-          </Form.Item>
+              <div>
+                <label className="block mb-1">ເລກພັດສະດຸ (No Box)</label>
+                <input
+                  type="text"
+                  name="Cus_no_box"
+                  value={data.Cus_no_box}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="BOX001"
+                />
+              </div>
 
-          <Form.Item
-            label="ເລກພັດສະດຸ (S Box)"
-            name="Sbox"
-            rules={[{ required: true, message: "ກະລຸນາໃສ່ເລກSbox" }]}
-          >
-            <Input placeholder="ເຊັ່ນ SOX001" />
-          </Form.Item>
+              <div>
+                <label className="block mb-1">ເລືອກຫ້ອງ</label>
+                <select
+                  name="store"
+                  value={data.store}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                >
+                  <option value="">-- ຫ້ອງ --</option>
+                  {rooms.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <Form.Item
-            label="ລາຍລະອຽດ"
-            name="Doc"
-            rules={[{ required: true, message: "ກະລຸນາລະບຸລາຍລະອຽດ" }]}
-          >
-            <Input placeholder="ເລກທີເອກະສານ" />
-          </Form.Item>
+              {zones.length > 0 && (
+                <div>
+                  <label className="block mb-1">ໂຊນ</label>
+                  <select
+                    name="zone"
+                    value={data.zone}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="">-- Zone --</option>
+                    {zones.map((z) => (
+                      <option key={z.id} value={z.id}>
+                        {z.zone}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-          <Form.Item
-            label="ໂຊນຈັດເກັບ"
-            name="store"
-            rules={[{ required: true, message: "ກະລຸນາລະບຸໂຊນຈັດເກັບ" }]}
-          >
-            <Input placeholder="AX..." />
-          </Form.Item>
+              {rows.length > 0 && (
+                <div>
+                  <label className="block mb-1">ແຖວ (Row)</label>
+                  <select
+                    name="row"
+                    value={data.row}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="">-- Row --</option>
+                    {rows.map((r) => (
+                      <option key={r.row_no} value={r.row_no}>
+                        {r.row_no}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-          <Form.Item className="text-right">
-            <Button onClick={handleClose} className="mr-2">
-              ຍົກເລີກ
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              className="bg-blue-500 hover:bg-blue-600"
-            >
-              ບັນທຶກ
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+              {slots.length > 0 && (
+                <div>
+                  <label className="block mb-1">Slot</label>
+                  <select
+                    name="slot"
+                    value={data.slot}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="">-- Slot --</option>
+                    {slots.map((s) => (
+                      <option key={s.location_id} value={s.slot_no}>
+                        {s.slot_no}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block mb-1">S Box</label>
+                <input
+                  type="text"
+                  name="Sbox"
+                  value={data.Sbox}
+                  readOnly
+                  className="w-full px-3 py-2 border rounded-md bg-gray-200"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">ລາຍລະອຽດ</label>
+                <input
+                  type="text"
+                  name="Doc"
+                  value={data.Doc}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="ເລກທີເອກະສານ"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 mt-4">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400"
+                >
+                  ຍົກເລີກ
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                  disabled={loading}
+                >
+                  {loading ? "ກຳລັງບັນທຶກ..." : "ບັນທຶກ"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

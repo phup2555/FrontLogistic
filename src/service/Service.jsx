@@ -1,3 +1,4 @@
+import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { AiFillFileText } from "react-icons/ai";
 
@@ -34,6 +35,36 @@ export const fetchPdIn = async () => {
 //   }
 // };
 //--------------------------------//
+export const getZone = async (room_id) => {
+  try {
+    const response = await axios.get(`${BaseURL}/room/zone/${room_id}`);
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getRow = async (zone_id) => {
+  try {
+    const response = await axios.get(`${BaseURL}/room/row/${zone_id}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
+  console.log({ room_id });
+  console.log({ zone_id });
+  try {
+    const response = await axios.get(
+      `${BaseURL}/room/slot/${room_id}/${zone_id}/${row_no}`
+    );
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
 export const PdDatas = async () => {
   try {
     const response = await axios.get(`${baseURL}/products/`);
