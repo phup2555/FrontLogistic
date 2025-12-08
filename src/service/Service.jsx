@@ -25,15 +25,6 @@ export const fetchPdIn = async () => {
   }
 };
 
-// export const fetchPdOut = async () => {
-//   try {
-//     const response = await axios.get(`${baseURL}/products/pdOutlength`);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Axios error (fetchPdOut):", error);
-//     throw error;
-//   }
-// };
 //--------------------------------//
 export const getZone = async (room_id) => {
   try {
@@ -65,6 +56,7 @@ export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
     console.log(error);
   }
 };
+//--------------------------------//
 export const PdDatas = async () => {
   try {
     const response = await axios.get(`${baseURL}/products/`);
@@ -76,7 +68,7 @@ export const PdDatas = async () => {
 };
 export const AddPdData = async (data) => {
   try {
-    const response = await axios.post(`${baseURL}/products/`, data);
+    const response = await axios.post(`${BaseURL}/products/`, data);
     return response.data;
   } catch (error) {
     console.error("Axios error (AddPdData):", error);

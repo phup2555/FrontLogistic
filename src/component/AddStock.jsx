@@ -18,17 +18,16 @@ export default function AddStock({ fetchPdData }) {
 
   // state ฟอร์มข้อมูลของพัสดุ
   const [data, setData] = useState({
-    name: "",
-    Cus_no_box: "",
+    pd_customer_name: "",
+    pd_customer_No_box: "",
     store: "",
     zone: "",
     row: "",
-    slot: "",
+    location_id: "",
     Sbox: "",
     Doc: "",
   });
 
-  // ตัวเลือกห้องแบบ fix
   const [rooms] = useState([
     { id: "4", name: "01" },
     { id: "5", name: "02" },
@@ -47,8 +46,8 @@ export default function AddStock({ fetchPdData }) {
   const handleClose = () => {
     setVisible(false);
     setData({
-      name: "",
-      Cus_no_box: "",
+      pd_customer_name: "",
+      pd_customer_No_box: "",
       store: "",
       zone: "",
       row: "",
@@ -121,10 +120,6 @@ export default function AddStock({ fetchPdData }) {
     }
   }, [data.row]);
 
-  // -------------------------------------------
-  // auto-generate Sbox เมื่อเลือก slot
-  // เช่น 01A102 → ห้อง + zone + row + slot
-  // -------------------------------------------
   useEffect(() => {
     if (data.store && data.zone && data.row && data.slot) {
       const roomName = rooms.find((r) => r.id === data.store)?.name || "";
@@ -141,9 +136,6 @@ export default function AddStock({ fetchPdData }) {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // -------------------------------------------
-  // Submit ฟอร์ม → AddPdData → print barcode
-  // -------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -157,13 +149,10 @@ export default function AddStock({ fetchPdData }) {
         icon: "success",
       });
 
-      // refresh data ใน table
       fetchPdData();
 
-      // ปิด modal
       handleClose();
 
-      // ถ้ามี barcode ให้เลือกพิมพ์
       if (res?.barcode) {
         const printConfirm = await Swal.fire({
           title: "ສຳເລັດ",
@@ -228,8 +217,8 @@ export default function AddStock({ fetchPdData }) {
                 <label className="block mb-1">ຊື່ລູກຄ້າ</label>
                 <input
                   type="text"
-                  name="name"
-                  value={data.name}
+                  name="pd_customer_name"
+                  value={data.pd_customer_name}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border rounded-md"
@@ -241,8 +230,8 @@ export default function AddStock({ fetchPdData }) {
                 <label className="block mb-1">ເລກພັດສະດຸ (No Box)</label>
                 <input
                   type="text"
-                  name="Cus_no_box"
-                  value={data.Cus_no_box}
+                  name="pd_customer_No_box"
+                  value={data.pd_customer_No_box}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border rounded-md"
@@ -312,15 +301,13 @@ export default function AddStock({ fetchPdData }) {
                 <div>
                   <label className="block mb-1">Slot</label>
                   <select
-                    name="slot"
-                    value={data.slot}
+                    name="location_id"
+                    value={data.location_id}
                     onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border rounded-md"
                   >
                     <option value="">-- Slot --</option>
                     {slots.map((s) => (
-                      <option key={s.location_id} value={s.slot_no}>
+                      <option key={s.location_id} value={s.location_id}>
                         {s.slot_no}
                       </option>
                     ))}
