@@ -8,7 +8,7 @@ import {
 import Swal from "sweetalert2";
 
 export default function AddStock({ fetchPdData }) {
-  const baseurl = "http://localhost:4000/public";
+  const baseurl = "http://localhost:3000/barcode/";
 
   // state เปิด/ปิด modal
   const [visible, setVisible] = useState(false);
@@ -142,7 +142,7 @@ export default function AddStock({ fetchPdData }) {
 
     try {
       const res = await AddPdData(data);
-
+      console.log({ res });
       Swal.fire({
         title: "Success",
         text: "ເພີ່ມຂໍ້ມູນສຳເລັດ!",
@@ -163,20 +163,22 @@ export default function AddStock({ fetchPdData }) {
           cancelButtonText: "ຍົກເລີກ",
         });
 
-        // ถ้ากดพิมพ์
         if (printConfirm.isConfirmed) {
           const barcodeUrl = `${baseurl}${res.barcode}`;
-
-          // สร้าง iframe เพื่อเปิดภาพแล้ว print ทันที
+          console.log({ barcodeUrl });
           const iframe = document.createElement("iframe");
           iframe.style.display = "none";
           document.body.appendChild(iframe);
 
           const doc = iframe.contentWindow.document;
           doc.open();
-          doc.write(
-            `<html><body class="text-center mt-12"><img src="${barcodeUrl}" class="w-[800px] h-auto" /></body></html>`
-          );
+          doc.write(`
+      <html>
+        <body style="text-align:center;margin-top:40px">
+          <img src="${barcodeUrl}" style="width:300px" />
+        </body>
+      </html>
+    `);
           doc.close();
 
           iframe.contentWindow.onload = () => {

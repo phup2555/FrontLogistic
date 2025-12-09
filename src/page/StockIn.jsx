@@ -91,7 +91,7 @@ export default function StockIn() {
   const fetchPdData = async () => {
     try {
       const response = await PdDatas();
-      setPdData(response);
+      setPdData(response.data);
     } catch (error) {
       console.error("Cannot get all product data:", error);
     }
@@ -104,7 +104,7 @@ export default function StockIn() {
   }, []);
 
   const status = Number(statusFilter);
-
+  console.log({ PdData });
   const filteredSearchData = PdData.filter((item) => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =

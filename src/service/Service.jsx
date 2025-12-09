@@ -59,7 +59,7 @@ export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
 //--------------------------------//
 export const PdDatas = async () => {
   try {
-    const response = await axios.get(`${baseURL}/products/`);
+    const response = await axios.get(`${BaseURL}/products/`);
     return response.data;
   } catch (error) {
     console.error("Axios error (PdDatas):", error);
@@ -75,6 +75,7 @@ export const AddPdData = async (data) => {
     throw error;
   }
 };
+//--------------------------------//
 export const PdDatasHistory = async () => {
   try {
     const response = await axios.get(`${baseURL}/logs/`);
@@ -98,6 +99,16 @@ export const outStock = async (id, data, docOut) => {
     const response = await axios.patch(`${baseURL}/products/out/${id}`, body);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const getBarcode = async (barcode) => {
+  try {
+    const response = await axios.get(`${baseURL}/barcode/${barcode}`);
+    return response.data;
+  } catch (error) {
+    console.error("Axios error (PdDatas):", error);
     throw error;
   }
 };
