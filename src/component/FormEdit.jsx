@@ -10,7 +10,7 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
     pd_customer_name: "",
     pd_store: "",
   });
-
+  console.log({ editdata });
   useEffect(() => {
     if (editdata) setPdData(editdata);
   }, [editdata]);

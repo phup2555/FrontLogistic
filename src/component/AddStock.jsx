@@ -8,7 +8,7 @@ import {
 import Swal from "sweetalert2";
 
 export default function AddStock({ fetchPdData }) {
-  const baseurl = "http://localhost:3000/barcode/";
+  const baseurl = "http://localhost:3000/api/barcode/";
 
   // state เปิด/ปิด modal
   const [visible, setVisible] = useState(false);
@@ -306,6 +306,7 @@ export default function AddStock({ fetchPdData }) {
                     name="location_id"
                     value={data.location_id}
                     onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded-md"
                   >
                     <option value="">-- Slot --</option>
                     {slots.map((s) => (

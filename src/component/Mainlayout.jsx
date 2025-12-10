@@ -36,7 +36,7 @@ export default function MainLayout({ children }) {
       key: "/dashboard",
       icon: <DashboardOutlined />,
       label: "ໜ້າຫຼັກ",
-      onClick: () => navigate("/"),
+      onClick: () => navigate("/Dashboard"),
     },
     // {
     //   key: "sub1",
@@ -117,14 +117,18 @@ export default function MainLayout({ children }) {
             if (mobileView) setSidebarVisible(false);
           }}
         />
-
-        {/* ⭐ ปุ่มเปิด–ปิดแบบ FIXED ที่ด้านล่าง ⭐ */}
-        <div
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute bottom-0 left-0 w-full p-3 bg-[#A9A9A9] text-black text-xl flex justify-center cursor-pointer border-t border-gray-400"
-          style={{ position: "absolute" }}
-        >
-          {collapsed ? <MenuOutlined /> : <CloseOutlined />}
+        <div className="absolute bottom-0 left-0 w-full  flex justify-center">
+          <Button
+            type="primary"
+            danger
+            onClick={() => {
+              // ทำ logout logic
+              navigate("/");
+            }}
+            className="w-full m-0 p-0 rounded-lg mb-1"
+          >
+            Logout
+          </Button>
         </div>
       </Sider>
 

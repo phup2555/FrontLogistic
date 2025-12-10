@@ -26,7 +26,7 @@ export default function StockIn() {
   const [statusFilter, setStatusFilter] = useState("0");
 
   // const [scanResult, setScanResult] = useState("");
-  const baseurl = "http://localhost:4000/public";
+  const baseurl = "http://localhost:3000/api/barcode/";
 
   const handleClickOut = async (item) => {
     try {
@@ -63,8 +63,8 @@ export default function StockIn() {
         didOpen: () => Swal.showLoading(),
       });
 
-      const res = await outStock(item.pd_id, item, docOut);
-
+      const res = await outStock(item.pd_id, docOut);
+      fetchPdData();
       Swal.close();
 
       if (res && res.status === 200) {
@@ -132,12 +132,10 @@ export default function StockIn() {
     startIndex,
     startIndex + itemsPerPage
   );
-
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
   };
-  console.log({ paginatedData });
   const exportToExcel = () => {
     const title = "ລາຍງານສິນຄ້າໃນສາງ";
     const subtitle = `ປະຈຳວັນທີ: ${new Date().toLocaleDateString("en-GB")}`;
@@ -186,9 +184,9 @@ export default function StockIn() {
     aoa.push([]);
     aoa.push([]);
     aoa.push([]);
-    aoa.push([title]); // A5
-    aoa.push([subtitle]); // A6
-    aoa.push([]); // A7
+    aoa.push([title]);
+    aoa.push([subtitle]);
+    aoa.push([]);
     aoa.push(headers);
     dataRows.forEach((r) => aoa.push(r));
 
@@ -429,7 +427,7 @@ export default function StockIn() {
                   </td> */}
                   <td className="py-3 px-4">{item.pd_store}</td>
 
-                  {item.pd_status != 2 ? (
+                  {item.pd_status != "withdrawn" ? (
                     <td className="py-3 px-4 align-middle">
                       <div className="flex gap-2 justify-center items-center h-full">
                         <Button
