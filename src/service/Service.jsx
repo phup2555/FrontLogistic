@@ -117,3 +117,13 @@ export const getBarcode = async (barcode) => {
     throw error;
   }
 };
+
+export const LoginWeb = async (body) => {
+  try {
+    const response = await axios.post(`${BaseURL}/users/login`, body);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

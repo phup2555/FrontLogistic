@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { LoginWeb } from "../service/Service";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const [email, setLogin_User] = useState("");
@@ -9,9 +11,29 @@ const Login = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      const response = await LoginWeb({ username: email, password: password });
+      console.log({ response });
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("username", response.result.username);
+      localStorage.setItem("role", response.result.role);
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: response.message,
+        timer: 2000,
+        showConfirmButton: false,
+      });
       window.location.replace("/Dashboard");
     } catch (error) {
-      alert(error.message || "Something went wrong");
+      const backendMessage =
+        error.response?.data?.message || "Something went wrong";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: backendMessage,
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsSubmitting(false);
     }
