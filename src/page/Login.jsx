@@ -23,7 +23,14 @@ const Login = () => {
         timer: 2000,
         showConfirmButton: false,
       });
-      window.location.replace("/Dashboard");
+      console.log("role", response.result.role);
+      if (response.result.role === "LogisAdminnn") {
+        window.location.replace("/Dashboard");
+      } else if (response.result.role === "UserLogistic") {
+        window.location.replace("/in");
+      } else {
+        window.location.replace("/");
+      }
     } catch (error) {
       const backendMessage =
         error.response?.data?.message || "Something went wrong";

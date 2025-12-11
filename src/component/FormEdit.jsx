@@ -36,7 +36,7 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "Server error",
+        text: error.message || "ການແກ້ໄຂຂໍ້ມູນລົ້ມເຫຼວ",
         icon: "error",
         showConfirmButton: false,
         timer: 2000,

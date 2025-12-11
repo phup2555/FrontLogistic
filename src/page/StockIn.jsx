@@ -14,6 +14,7 @@ import { IoMdSearch } from "react-icons/io";
 import { RiFileEditFill } from "react-icons/ri";
 import { AiOutlineCheck } from "react-icons/ai";
 import Swal from "sweetalert2";
+import { checkAdmin } from "../utils/roleHelper";
 export default function StockIn() {
   const [PdData, setPdData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,8 +83,11 @@ export default function StockIn() {
       console.error("Error out stock:", error);
       Swal.fire({
         title: "ຜິດພາດ!",
-        text: "ການນຳອອກລົ້ມເຫຼວ",
+        text: error.message || "ການນຳອອກສິນຄ້າລົ້ມເຫຼວ",
         icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showCancelButton: false,
       });
     }
   };
@@ -312,9 +316,11 @@ export default function StockIn() {
       </h1>
 
       <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="">
-          <AddStock onAdded={editdata} fetchPdData={fetchPdData} />
-        </div>
+        {!checkAdmin && (
+          <div className="">
+            <AddStock onAdded={editdata} fetchPdData={fetchPdData} />
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Select
@@ -344,7 +350,7 @@ export default function StockIn() {
             onChange={handleSearchChange}
             prefix={<IoMdSearch className="text-gray-500 text-lg" />}
             allowClear
-            className="w-full sm:w-[250px] md:w-[350px]"
+            className="w-full  md:w-[100px] lg:w-[200px] "
           />
         </div>
       </div>
@@ -430,25 +436,29 @@ export default function StockIn() {
                   {item.pd_status != "withdrawn" ? (
                     <td className="py-3 px-4 align-middle">
                       <div className="flex gap-2 justify-center items-center h-full">
-                        <Button
-                          type="primary"
-                          size="small"
-                          className="bg-[#928E85] hover:!bg-[#7a776f] flex items-center gap-1"
-                          onClick={() => {
-                            setEditdata(item);
-                            setEditdataPopup(true);
-                          }}
-                        >
-                          <RiFileEditFill className="text-white text-base" />
-                        </Button>
-                        <Button
-                          type="primary"
-                          size="small"
-                          className="bg-[#3B82F6] hover:!bg-[#2563EB] flex items-center gap-1 shadow-md"
-                          onClick={() => handleClickOut(item)}
-                        >
-                          <AiOutlineCheck className="text-white text-base" />
-                        </Button>
+                        {!checkAdmin && (
+                          <Button
+                            type="primary"
+                            size="small"
+                            className="bg-[#928E85] hover:!bg-[#7a776f] flex items-center gap-1"
+                            onClick={() => {
+                              setEditdata(item);
+                              setEditdataPopup(true);
+                            }}
+                          >
+                            <RiFileEditFill className="text-white text-base" />
+                          </Button>
+                        )}
+                        {!checkAdmin && (
+                          <Button
+                            type="primary"
+                            size="small"
+                            className="bg-[#3B82F6] hover:!bg-[#2563EB] flex items-center gap-1 shadow-md"
+                            onClick={() => handleClickOut(item)}
+                          >
+                            <AiOutlineCheck className="text-white text-base" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   ) : (

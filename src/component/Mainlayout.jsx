@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Menu, Grid, Button } from "antd";
 import { TbReportSearch } from "react-icons/tb";
-import {
-  DashboardOutlined,
-  UploadOutlined,
-  MenuOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
+import { checkAdmin } from "../utils/roleHelper";
+import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiBox } from "react-icons/fi";
 
 const { Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -31,42 +26,18 @@ export default function MainLayout({ children }) {
     }
   }, [screens]);
 
-  const menuItems = [
+  const userMenu = [
+    { key: "/in", label: "ພັດສະດຸ", onClick: () => navigate("/in") },
+  ];
+
+  const adminMenu = [
     {
       key: "/dashboard",
-      icon: <DashboardOutlined />,
       label: "ໜ້າຫຼັກ",
       onClick: () => navigate("/Dashboard"),
     },
-    // {
-    //   key: "sub1",
-    //   icon: <UploadOutlined />,
-    //   label: "ຈັດການ",
-    //   children: [
-    //     {
-    //       key: "/in",
-    //       label: "ຂາເຂົ້າ",
-    //       onClick: () => navigate("/in"),
-    //     },
-    //     {
-    //       key: "/out",
-    //       label: "ຂາອອກ",
-    //       onClick: () => navigate("/out"),
-    //     },
-    //   ],
-    // },
-    {
-      key: "/in",
-      icon: <FiBox />,
-      label: "ພັດສະດຸ",
-      onClick: () => navigate("/in"),
-    },
-    {
-      key: "/Report",
-      icon: <TbReportSearch />,
-      label: "ລາຍງານ",
-      onClick: () => navigate("/Report"),
-    },
+    ...userMenu,
+    { key: "/Report", label: "ລາຍງານ", onClick: () => navigate("/Report") },
   ];
 
   const siderWidth = 250;
@@ -109,10 +80,10 @@ export default function MainLayout({ children }) {
             borderRight: 0,
             background: "#928E85",
             color: "#000000",
-            paddingBottom: "60px", // กันให้เมนูไม่ทับปุ่มด้านล่าง
+            paddingBottom: "60px",
           }}
           selectedKeys={[location.pathname]}
-          items={menuItems}
+          items={checkAdmin() ? adminMenu : userMenu}
           onClick={() => {
             if (mobileView) setSidebarVisible(false);
           }}

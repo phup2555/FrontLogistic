@@ -1,12 +1,30 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
-
-const baseURL = "http://localhost:4000/api";
+import { checkAdmin } from "../utils/roleHelper";
 const BaseURL = "http://localhost:3000/api";
+const api = axios.create({
+  baseURL: BaseURL,
+});
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  }
+);
 export const fetchAllPdLength = async () => {
   try {
-    const response = await axios.get(`${BaseURL}/products/`);
+    const response = await api.get(`/products/`);
     return response.data;
   } catch (error) {
     console.error("Axios error (fetchAllPdLength):", error);
@@ -16,7 +34,7 @@ export const fetchAllPdLength = async () => {
 
 export const fetchPdIn = async () => {
   try {
-    const response = await axios.get(`${BaseURL}/products/Location`);
+    const response = await api.get(`/products/Location`);
     return response.data;
   } catch (error) {
     console.error("Axios error (fetchPdIn):", error);
@@ -26,7 +44,7 @@ export const fetchPdIn = async () => {
 
 export const getZone = async (room_id) => {
   try {
-    const response = await axios.get(`${BaseURL}/room/zone/${room_id}`);
+    const response = await api.get(`/room/zone/${room_id}`);
 
     return response.data;
   } catch (error) {
@@ -35,7 +53,7 @@ export const getZone = async (room_id) => {
 };
 export const getRow = async (zone_id) => {
   try {
-    const response = await axios.get(`${BaseURL}/room/row/${zone_id}`);
+    const response = await api.get(`/room/row/${zone_id}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -45,8 +63,8 @@ export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
   console.log({ room_id });
   console.log({ zone_id });
   try {
-    const response = await axios.get(
-      `${BaseURL}/room/slot/${room_id}/${zone_id}/${row_no}`
+    const response = await api.get(
+      `/room/slot/${room_id}/${zone_id}/${row_no}`
     );
     console.log(response);
     return response.data;
@@ -56,7 +74,7 @@ export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
 };
 export const PdDatas = async () => {
   try {
-    const response = await axios.get(`${BaseURL}/products/`);
+    const response = await api.get(`/products/`);
     return response.data;
   } catch (error) {
     console.error("Axios error (PdDatas):", error);
@@ -65,7 +83,10 @@ export const PdDatas = async () => {
 };
 export const AddPdData = async (data) => {
   try {
-    const response = await axios.post(`${BaseURL}/products/`, data);
+    if (!checkAdmin()) {
+      throw new Error("ທ່ານບໍ່ມີສິດໃນການດຳເນີນການນີ້");
+    }
+    const response = await api.post(`/products/`, data);
     return response.data;
   } catch (error) {
     console.error("Axios error (AddPdData):", error);
@@ -75,7 +96,7 @@ export const AddPdData = async (data) => {
 
 // export const PdDatasHistory = async () => {
 //   try {
-//     const response = await axios.get(`${baseURL}/logs/`);
+//     const response = await axios.get(`/logs/`);
 //     return response.data;
 //   } catch (error) {
 //     console.error("Axios error (PdDatas):", error);
@@ -84,10 +105,10 @@ export const AddPdData = async (data) => {
 // };
 export const editProduct = async (productId, data) => {
   try {
-    const response = await axios.patch(
-      `${BaseURL}/products/${productId}`,
-      data
-    );
+    if (!checkAdmin()) {
+      throw new Error("ທ່ານບໍ່ມີສິດໃນການດຳເນີນການນີ້");
+    }
+    const response = await api.patch(`/products/${productId}`, data);
     return response.data;
   } catch (error) {
     throw error;
@@ -96,31 +117,31 @@ export const editProduct = async (productId, data) => {
 
 export const outStock = async (productId, docOut) => {
   try {
+    if (!checkAdmin()) {
+      throw new Error("ທ່ານບໍ່ມີສິດໃນການດຳເນີນການນີ້");
+    }
     const data = {
       docOut: docOut,
     };
-    const response = await axios.patch(
-      `${BaseURL}/products/out/${productId}`,
-      data
-    );
+    const response = await api.patch(`/products/out/${productId}`, data);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
-export const getBarcode = async (barcode) => {
-  try {
-    const response = await axios.get(`${baseURL}/barcode/${barcode}`);
-    return response.data;
-  } catch (error) {
-    console.error("Axios error (PdDatas):", error);
-    throw error;
-  }
-};
+// export const getBarcode = async (barcode) => {
+//   try {
+//     const response = await axios.get(`/barcode/${barcode}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Axios error (PdDatas):", error);
+//     throw error;
+//   }
+// };
 
 export const LoginWeb = async (body) => {
   try {
-    const response = await axios.post(`${BaseURL}/users/login`, body);
+    const response = await api.post(`/users/login`, body);
     console.log(response);
     return response.data;
   } catch (error) {

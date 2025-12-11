@@ -188,11 +188,13 @@ export default function AddStock({ fetchPdData }) {
         }
       }
     } catch (err) {
-      console.log(err);
       Swal.fire({
-        title: "Error",
-        text: "ບັນທຶກຂໍ້ມູນບໍ່ສຳເລັດ",
+        title: "ຜິດພາດ!",
+        text: err.message || "ການເພີ່ມຂໍ້ມູນລົ້ມເຫຼວ",
         icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showCancelButton: false,
       });
     } finally {
       setLoading(false);
