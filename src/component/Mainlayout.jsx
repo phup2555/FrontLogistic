@@ -122,8 +122,8 @@ export default function MainLayout({ children }) {
             type="primary"
             danger
             onClick={() => {
-              // ทำ logout logic
               navigate("/");
+              localStorage.clear();
             }}
             className="w-full m-0 p-0 rounded-lg mb-1"
           >
