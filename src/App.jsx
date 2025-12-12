@@ -9,32 +9,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route
-          path="/Dashboard"
-          element={
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/In"
-          element={
-            <MainLayout>
-              <StockIn />
-            </MainLayout>
-          }
-        />
-
-        <Route
-          path="/Report"
-          element={
-            <MainLayout>
-              <Report />
-            </MainLayout>
-          }
-        />
+        <Route index path="/" element={<Login />} />
+        <Route element={<MainLayout />}>
+          <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/Report" element={<Report />} />
+          <Route path="/In" element={<StockIn />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

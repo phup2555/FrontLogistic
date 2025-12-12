@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { Layout, Menu, Grid, Button } from "antd";
 import { TbReportSearch } from "react-icons/tb";
 import { checkAdmin } from "../utils/roleHelper";
 import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 const { Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -16,6 +17,7 @@ export default function MainLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const screens = useBreakpoint();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const isMobile = !screens.md;
@@ -42,6 +44,12 @@ export default function MainLayout({ children }) {
 
   const siderWidth = 250;
   const siderCollapsedWidth = 80;
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/");
+    }
+  }, [token, navigate]);
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -88,7 +96,7 @@ export default function MainLayout({ children }) {
             if (mobileView) setSidebarVisible(false);
           }}
         />
-        <div className="absolute bottom-0 left-0 w-full  flex justify-center">
+        <div className="absolute bottom-0 left-0 w-full flex justify-center p-2">
           <Button
             type="primary"
             danger
@@ -96,7 +104,17 @@ export default function MainLayout({ children }) {
               navigate("/");
               localStorage.clear();
             }}
-            className="w-full m-0 p-0 rounded-lg mb-1"
+            className="
+      w-full 
+      bg-gradient-to-r from-red-600 to-red-500
+      hover:from-red-700 hover:to-red-600
+      text-white font-semibold
+      rounded-tl-xl rounded-tr-xl
+      shadow-md hover:shadow-lg
+      transition-all duration-300
+      py-5
+      border-none
+    "
           >
             Logout
           </Button>
@@ -141,7 +159,7 @@ export default function MainLayout({ children }) {
             borderRadius: 8,
           }}
         >
-          {children}
+          <Outlet />
         </Content>
       </Layout>
     </Layout>

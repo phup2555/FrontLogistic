@@ -164,9 +164,9 @@ export default function StockIn() {
         ? new Date(d.pd_out_date).toLocaleDateString("en-GB")
         : "";
       const status =
-        d.pd_status == 1
+        d.pd_status == "in_storage"
           ? "🟢 ຢູ່ໃນສາງ"
-          : d.pd_status == 2
+          : d.pd_status == "withdrawn"
           ? "🔴 ນຳອອກແລ້ວ"
           : "";
 
