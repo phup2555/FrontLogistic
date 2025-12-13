@@ -195,6 +195,7 @@ export default function AddStock({ fetchPdData }) {
         timer: 2000,
         timerProgressBar: true,
         showCancelButton: false,
+        showConfirmButton: false,
       });
     } finally {
       setLoading(false);

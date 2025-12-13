@@ -316,7 +316,7 @@ export default function StockIn() {
       </h1>
 
       <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        {!checkAdmin && (
+        {checkAdmin && (
           <div className="">
             <AddStock onAdded={editdata} fetchPdData={fetchPdData} />
           </div>

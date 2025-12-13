@@ -1,7 +1,7 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { checkAdmin } from "../utils/roleHelper";
-const BaseURL = "http://localhost:3000/api";
+const BaseURL = "http://27.254.143.210:3000/api";
 const api = axios.create({
   baseURL: BaseURL,
 });

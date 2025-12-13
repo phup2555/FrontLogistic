@@ -32,14 +32,17 @@ const Login = () => {
         window.location.replace("/");
       }
     } catch (error) {
-      const backendMessage =
-        error.response?.data?.message || "Something went wrong";
+      console.log("=== ERROR RAW ===", error);
+      console.log("=== ERROR RESPONSE ===", error.response);
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: backendMessage,
-        timer: 1500,
+        text: error.response?.data?.message || "ERROR NO MESSAGE",
         showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        showCancelButton: false,
       });
     } finally {
       setIsSubmitting(false);
