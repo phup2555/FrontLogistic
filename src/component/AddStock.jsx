@@ -8,7 +8,7 @@ import {
 import Swal from "sweetalert2";
 
 export default function AddStock({ fetchPdData }) {
-  const baseurl = "http://localhost:3000/api/barcode/";
+  const baseurl = "http://27.254.143.210:3000/api/barcode/";
 
   // state เปิด/ปิด modal
   const [visible, setVisible] = useState(false);
@@ -61,7 +61,8 @@ export default function AddStock({ fetchPdData }) {
     setRows([]);
     setSlots([]);
   };
-
+  console.log({ data });
+  console.log({ zones });
   // -------------------------------------------
   // เมื่อเลือกห้อง store → ไป fetch zones
   // -------------------------------------------
@@ -119,21 +120,45 @@ export default function AddStock({ fetchPdData }) {
       setData((prev) => ({ ...prev, slot: "", Sbox: "" }));
     }
   }, [data.row]);
-
+  console.log({ data });
   useEffect(() => {
     if (data.store && data.zone && data.row && data.slot) {
       const roomName = rooms.find((r) => r.id === data.store)?.name || "";
-      const zoneName = zones.find((z) => z.zone === data.zone)?.zone || "";
-      const sbox = `${roomName}${zoneName}${data.row}${data.slot}`;
-
+      const sbox = `${roomName}${data.zone}${data.row}${data.slot}`;
+      console.log({ sbox });
       setData((prev) => ({ ...prev, Sbox: sbox }));
     }
   }, [data.slot]);
 
-  // ฟังก์ชันเปลี่ยนค่าฟอร์ม
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prev) => ({ ...prev, [name]: value }));
+
+    setData((prev) => {
+      let updated = { ...prev, [name]: value };
+
+      if (name === "store") {
+        // เปลี่ยนห้อง → reset zone, row, slot, Sbox
+        updated.zone = "";
+        updated.row = "";
+        updated.slot = "";
+        updated.Sbox = "";
+      }
+
+      if (name === "zone") {
+        // เปลี่ยน zone → reset row, slot, Sbox
+        updated.row = "";
+        updated.slot = "";
+        updated.Sbox = "";
+      }
+
+      if (name === "row") {
+        // เปลี่ยน row → reset slot, Sbox
+        updated.slot = "";
+        updated.Sbox = "";
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -161,6 +186,13 @@ export default function AddStock({ fetchPdData }) {
           showCancelButton: true,
           confirmButtonText: "ພິມ",
           cancelButtonText: "ຍົກເລີກ",
+          customClass: {
+            confirmButton:
+              "bg-blue-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:bg-blue-700 transition",
+            cancelButton:
+              "bg-red-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:bg-red-600 transition",
+          },
+          buttonsStyling: false,
         });
 
         if (printConfirm.isConfirmed) {
@@ -176,6 +208,12 @@ export default function AddStock({ fetchPdData }) {
       <html>
         <body style="text-align:center;margin-top:40px">
           <img src="${barcodeUrl}" style="width:300px" />
+          <br/>
+          <span style="font-size:16px;font-family:Arial, sans-serif;">${data.pd_customer_name}</span>
+          <br/>
+          <span style="font-size:18px;font-family:Arial, sans-serif;">${data.pd_customer_No_box}</span>
+          <br/>
+          <span style="font-size:16px;font-family:Arial, sans-serif;">S Box: ${data.Sbox}</span>
         </body>
       </html>
     `);
@@ -274,7 +312,7 @@ export default function AddStock({ fetchPdData }) {
                   >
                     <option value="">-- Zone --</option>
                     {zones.map((z) => (
-                      <option key={z.id} value={z.id}>
+                      <option key={z.zone} value={z.zone}>
                         {z.zone}
                       </option>
                     ))}
@@ -306,14 +344,24 @@ export default function AddStock({ fetchPdData }) {
                 <div>
                   <label className="block mb-1">Slot</label>
                   <select
-                    name="location_id"
-                    value={data.location_id}
-                    onChange={handleChange}
+                    name="slot"
+                    value={data.slot}
+                    onChange={(e) => {
+                      const selectedSlot = e.target.value;
+                      const selectedLocation =
+                        slots.find((s) => s.slot_no === selectedSlot)
+                          ?.location_id || "";
+                      setData((prev) => ({
+                        ...prev,
+                        slot: selectedSlot,
+                        location_id: selectedLocation,
+                      }));
+                    }}
                     className="w-full px-3 py-2 border rounded-md"
                   >
                     <option value="">-- Slot --</option>
                     {slots.map((s) => (
-                      <option key={s.location_id} value={s.location_id}>
+                      <option key={s.location_id} value={s.slot_no}>
                         {s.slot_no}
                       </option>
                     ))}

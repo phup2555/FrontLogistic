@@ -24,10 +24,10 @@ export default function StockIn() {
   const itemsPerPage = 6;
   const [scanOpen, setScanOpen] = useState(false);
   const inputRef = useRef(null);
-  const [statusFilter, setStatusFilter] = useState("0");
+  const [statusFilter, setStatusFilter] = useState("ທັງໝົດ");
 
   // const [scanResult, setScanResult] = useState("");
-  const baseurl = "http://localhost:3000/api/barcode/";
+  const baseurl = "http://27.254.143.210:3000/api/barcode/";
 
   const handleClickOut = async (item) => {
     try {
@@ -107,8 +107,7 @@ export default function StockIn() {
     fetchPdData();
   }, []);
 
-  const status = Number(statusFilter);
-  console.log({ PdData });
+  const status = statusFilter;
   const filteredSearchData = PdData.filter((item) => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
@@ -117,13 +116,13 @@ export default function StockIn() {
       item.pd_customer_No_box?.toLowerCase().includes(lowerSearch) ||
       item.barcode?.split("/barcodes/").includes(searchTerm);
 
-    const itemStatus = Number(item.pd_status);
+    const itemStatus = item.pd_status;
     let matchesStatus = true;
-    if (status === 1) {
-      matchesStatus = itemStatus === 1;
-    } else if (status === 2) {
-      matchesStatus = itemStatus === 2;
-    } else if (status === 0) {
+    if (status === "in_storage") {
+      matchesStatus = itemStatus === "in_storage";
+    } else if (status === "withdrawn") {
+      matchesStatus = itemStatus === "withdrawn";
+    } else {
       matchesStatus = true;
     }
 
@@ -330,9 +329,9 @@ export default function StockIn() {
             placeholder="ເລືອກສະຖານະ"
             allowClear
           >
-            <Option value="0">ທັງໝົດ</Option>
-            <Option value="1">ຢູ່ໃນສາງ</Option>
-            <Option value="2">ນຳອອກແລ້ວ</Option>
+            <Option value="ທັງໝົດ">ທັງໝົດ</Option>
+            <Option value="in_storage">ຢູ່ໃນສາງ</Option>
+            <Option value="withdrawn">ນຳອອກແລ້ວ</Option>
           </Select>
 
           <Button
@@ -419,7 +418,14 @@ export default function StockIn() {
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  <td className="py-3 px-4">{item.pd_Document_Out}</td>
+
+                  <td className="py-3 px-4">
+                    {item.pd_Document_Out ? (
+                      item.pd_Document_Out
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
                   {/* <td className="py-3 px-4 flex justify-center items-center">
                     {item.pd_customer_No_box ? (
                       <img
@@ -431,12 +437,12 @@ export default function StockIn() {
                       <span className="text-gray-400">-</span>
                     )}
                   </td> */}
-                  <td className="py-3 px-4">{item.pd_store}</td>
+                  <td className="py-3 px-4">{item.pd_sbox}</td>
 
                   {item.pd_status != "withdrawn" ? (
                     <td className="py-3 px-4 align-middle">
                       <div className="flex gap-2 justify-center items-center h-full">
-                        {!checkAdmin && (
+                        {checkAdmin && (
                           <Button
                             type="primary"
                             size="small"
@@ -449,7 +455,7 @@ export default function StockIn() {
                             <RiFileEditFill className="text-white text-base" />
                           </Button>
                         )}
-                        {!checkAdmin && (
+                        {checkAdmin && (
                           <Button
                             type="primary"
                             size="small"
@@ -501,17 +507,16 @@ export default function StockIn() {
             }}
           /> */}
           <BarcodeScanner
-            onSuccess={(text) => {
-              setSearchTerm(text);
+            key={scanOpen ? "open" : "closed"}
+            facingMode="environment"
+            onSuccess={(result) => {
+              console.log("Scanned result:", result);
+              setSearchTerm(result.trim());
               setScanOpen(false);
             }}
-            onError={(error) => {
-              if (error) {
-                console.error(error.message);
-              }
-            }}
-            onLoad={() => console.log("Video feed has loaded!")}
-            containerStyle={{ width: "100%" }}
+            onError={(error) => console.error("Scan error:", error)}
+            onLoad={() => console.log("Video feed loaded")}
+            containerStyle={{ width: "300px", height: "300px" }}
           />
         </div>
         {searchTerm || "SCANNING..."}
