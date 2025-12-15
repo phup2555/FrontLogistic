@@ -23,3 +23,13 @@ export const checkAdmin = () => {
   const role = getRoleFromToken();
   return role === "LogisAdminnn";
 };
+export function getUserIdByLocalStorage() {
+  try {
+    const user_id = localStorage.getItem("user_id");
+    if (!user_id) return null;
+    return user_id;
+  } catch (error) {
+    console.error("Invalid UserId:", error);
+    return null;
+  }
+}

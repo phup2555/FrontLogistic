@@ -14,8 +14,7 @@ const Login = () => {
       const response = await LoginWeb({ username: email, password: password });
       console.log({ response });
       localStorage.setItem("token", response.token);
-      localStorage.setItem("username", response.result.username);
-      localStorage.setItem("role", response.result.role);
+      localStorage.setItem("user_id", response.result.userId);
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -23,7 +22,6 @@ const Login = () => {
         timer: 2000,
         showConfirmButton: false,
       });
-      console.log("role", response.result.role);
       if (response.result.role === "LogisAdminnn") {
         window.location.replace("/Dashboard");
       } else if (response.result.role === "UserLogistic") {
@@ -51,7 +49,6 @@ const Login = () => {
 
   return (
     <div className="flex flex-col lg:flex-row lg:min-h-screen">
-      {/* Form */}
       <div className="w-full lg:w-1/3 bg-white p-6 sm:p-12 flex flex-col justify-center min-h-screen lg:min-h-0">
         <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-semibold text-[#928E85] py-2">
@@ -61,7 +58,6 @@ const Login = () => {
         </div>
 
         <div className="space-y-4">
-          {/* Username */}
           <div className="flex flex-col">
             <label
               htmlFor="username"
@@ -149,7 +145,7 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="w-full lg:w-2/3 flex-1 min-h-screen lg:min-h-0">
+      <div className="hidden lg:flex w-2/3 flex-1 min-h-screen">
         <img
           src="https://www.easywarehouse-thailand.com/wp-content/uploads/2024/01/pexels-tiger-lily-4483610_0-scaled.jpg"
           alt="Login Banner"

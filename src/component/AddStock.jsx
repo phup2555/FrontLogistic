@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useEffectEvent } from "react";
 import {
   AddPdData,
   getZone,
@@ -6,9 +6,11 @@ import {
   getCheckEmtrpSlot,
 } from "../service/Service";
 import Swal from "sweetalert2";
+import { getUserIdByLocalStorage } from "../utils/roleHelper";
 
 export default function AddStock({ fetchPdData }) {
   const baseurl = "http://27.254.143.210:3000/api/barcode/";
+  const user_id = getUserIdByLocalStorage();
 
   // state เปิด/ปิด modal
   const [visible, setVisible] = useState(false);
@@ -26,6 +28,8 @@ export default function AddStock({ fetchPdData }) {
     location_id: "",
     Sbox: "",
     Doc: "",
+    user_id: "",
+    action: "",
   });
 
   const [rooms] = useState([
@@ -54,6 +58,8 @@ export default function AddStock({ fetchPdData }) {
       slot: "",
       Sbox: "",
       Doc: "",
+      user_id: "",
+      action: "",
     });
 
     // reset dropdown ทั้งหมด
@@ -61,8 +67,7 @@ export default function AddStock({ fetchPdData }) {
     setRows([]);
     setSlots([]);
   };
-  console.log({ data });
-  console.log({ zones });
+
   // -------------------------------------------
   // เมื่อเลือกห้อง store → ไป fetch zones
   // -------------------------------------------
@@ -120,7 +125,6 @@ export default function AddStock({ fetchPdData }) {
       setData((prev) => ({ ...prev, slot: "", Sbox: "" }));
     }
   }, [data.row]);
-  console.log({ data });
   useEffect(() => {
     if (data.store && data.zone && data.row && data.slot) {
       const roomName = rooms.find((r) => r.id === data.store)?.name || "";
@@ -164,9 +168,13 @@ export default function AddStock({ fetchPdData }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    const payload = {
+      ...data,
+      user_id,
+      action: "Add Stock",
+    };
     try {
-      const res = await AddPdData(data);
+      const res = await AddPdData(payload);
       console.log({ res });
       Swal.fire({
         title: "Success",

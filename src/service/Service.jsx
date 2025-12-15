@@ -1,8 +1,8 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { checkAdmin } from "../utils/roleHelper";
-const BaseURL = "/api";
-// const BaseURL = "http://localhost:3000/api";
+// const BaseURL = "https://api.lgstorageservice.com/api";
+const BaseURL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: BaseURL,
 });
@@ -82,6 +82,7 @@ export const PdDatas = async () => {
     throw error;
   }
 };
+
 export const AddPdData = async (data) => {
   try {
     if (!checkAdmin()) {
@@ -94,7 +95,7 @@ export const AddPdData = async (data) => {
     throw error;
   }
 };
-
+//Logs haka h hrd AddpdData
 // export const PdDatasHistory = async () => {
 //   try {
 //     const response = await axios.get(`/logs/`);
