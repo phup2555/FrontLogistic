@@ -129,7 +129,7 @@ export default function AddStock({ fetchPdData }) {
     if (data.store && data.zone && data.row && data.slot) {
       const roomName = rooms.find((r) => r.id === data.store)?.name || "";
       const sbox = `${roomName}${data.zone}${data.row}${data.slot}`;
-      console.log({ sbox });
+
       setData((prev) => ({ ...prev, Sbox: sbox }));
     }
   }, [data.slot]);
@@ -175,7 +175,7 @@ export default function AddStock({ fetchPdData }) {
     };
     try {
       const res = await AddPdData(payload);
-      console.log({ res });
+
       Swal.fire({
         title: "Success",
         text: "ເພີ່ມຂໍ້ມູນສຳເລັດ!",

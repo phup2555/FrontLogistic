@@ -1,29 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { editProduct } from "../service/Service";
 import Swal from "sweetalert2";
+import { getUserIdByLocalStorage } from "../utils/roleHelper";
 
 const FormEdit = ({ editdata, fetchPdData, popup }) => {
+  const user_id = getUserIdByLocalStorage();
   const [pdData, setPdData] = useState({
-    pd_Document: "",
-    pd_SBox: "",
     pd_customer_No_box: "",
     pd_customer_name: "",
-    pd_store: "",
+    action: "",
+    user_id: "",
   });
-  console.log({ editdata });
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (editdata) setPdData(editdata);
   }, [editdata]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = {
+      ...pdData,
+      action: "edit Product",
+      user_id: user_id,
+    };
+
     try {
-      const res = await editProduct(editdata.pd_id, pdData);
+      setLoading(true);
+      const res = await editProduct(editdata.pd_id, payload);
       console.log({ res });
-      if (res.status === 200) {
+      if (res.data?.success) {
         Swal.fire({
           title: "ສຳເລັດ",
-          text: res.message,
+          text: res.data?.message,
           icon: "success",
           showConfirmButton: false,
           timer: 2000,
@@ -32,6 +41,17 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
         });
         popup(false);
         fetchPdData();
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: res.message || "ການແກ້ໄຂຂໍ້ມູນລບໍ່ສຳເລັດ",
+          icon: "error",
+          showConfirmButton: false,
+          timer: 2000,
+          position: "top-end",
+          toast: true,
+        });
+        popup(false);
       }
     } catch (error) {
       Swal.fire({
@@ -43,7 +63,8 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
         position: "top-end",
         toast: true,
       });
-      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,7 +104,7 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-gray-700 mb-1">
                 ເລກພັດສະດຸ (S Box)
               </label>
@@ -96,8 +117,8 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 placeholder="ກະລຸນາປ້ອນເລກ S Box"
               />
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block text-gray-700 mb-1">ໂຊນທີ່ຈັດເກັບ</label>
               <input
                 value={pdData.pd_store}
@@ -108,7 +129,7 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 placeholder="ກະລຸນາປ້ອນເລກ S Box"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -121,9 +142,42 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-md"
+              onClick={handleSubmit}
+              disabled={loading}
+              className={`px-4 py-2 rounded-lg text-white shadow-md transition-colors
+    ${
+      loading
+        ? "bg-blue-400 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }`}
             >
-              ຢືນຢັນ
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 00-12 12h4z"
+                    />
+                  </svg>
+                  ກຳລັງດຳເນີນການ...
+                </span>
+              ) : (
+                "ຢືນຢັນ"
+              )}
             </button>
           </div>
         </form>

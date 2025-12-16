@@ -21,13 +21,15 @@ export default function StockIn() {
   const [currentPage, setCurrentPage] = useState(1);
   const [editdata, setEditdata] = useState(null);
   const [editdataPopup, setEditdataPopup] = useState(false);
-  const itemsPerPage = 6;
+  const itemsPerPage = 5;
   const [scanOpen, setScanOpen] = useState(false);
   const inputRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState("ທັງໝົດ");
 
-  // const [scanResult, setScanResult] = useState("");
-  const baseurl = "http://27.254.143.210:3000/api/barcode/";
+  // const baseurl = "http://27.254.143.210:3000/api/barcode/";
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const handleClickOut = async (item) => {
     try {
@@ -106,13 +108,13 @@ export default function StockIn() {
   useEffect(() => {
     fetchPdData();
   }, []);
-
+  console.log({ PdData });
   const status = statusFilter;
   const filteredSearchData = PdData.filter((item) => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
       item.pd_customer_name?.toLowerCase().includes(lowerSearch) ||
-      item.pd_SBox?.toLowerCase().includes(lowerSearch) ||
+      item.pd_sbox?.toLowerCase().includes(lowerSearch) ||
       item.pd_customer_No_box?.toLowerCase().includes(lowerSearch) ||
       item.barcode?.split("/barcodes/").includes(searchTerm);
 
@@ -135,6 +137,7 @@ export default function StockIn() {
     startIndex,
     startIndex + itemsPerPage
   );
+  console.log({ paginatedData });
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -368,6 +371,7 @@ export default function StockIn() {
         <table className="min-w-full bg-white divide-y divide-gray-200">
           <thead className="bg-[#928E85] text-white text-center">
             <tr>
+              <th className="py-3 px-4 font-medium">ລຳດັບ</th>
               <th className="py-3 px-4 font-medium">ບໍລິສັດ</th>
               <th className="py-3 px-4 font-medium">ລະຫັດພັດສະດຸ</th>
               <th className="py-3 px-4 font-medium">ລະຫັດ S/Box</th>
@@ -376,7 +380,6 @@ export default function StockIn() {
               <th className="py-3 px-4 font-medium">ອອກສາງ</th>
               <th className="py-3 px-4 font-medium">ເອກະສານຂາອອກ</th>
               {/* <th className="py-3 px-4 font-medium">ບາໂຄດ</th> */}
-              <th className="py-3 px-4 font-medium">ໂຊນຈັດເກັບ</th>
               <th className="py-3 px-4 font-medium">ຈັດການ</th>
             </tr>
           </thead>
@@ -389,14 +392,15 @@ export default function StockIn() {
                 </td>
               </tr>
             ) : (
-              paginatedData.map((item) => (
+              paginatedData.map((item, index) => (
                 <tr
-                  key={item.pd_customer_No_box + item.pd_SBox}
+                  key={item.pd_id}
                   className="text-center hover:bg-gray-50 transition duration-200"
                 >
+                  <td className="py-3 px-4">{index + 1}</td>
                   <td className="py-3 px-4">{item.pd_customer_name}</td>
                   <td className="py-3 px-4">{item.pd_customer_No_box}</td>
-                  <td className="py-3 px-4">{item.pd_SBox}</td>
+                  <td className="py-3 px-4">{item.pd_sbox}</td>
                   <td className="py-3 px-4">
                     {item.pd_incoming_date ? (
                       <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-semibold">
@@ -437,7 +441,6 @@ export default function StockIn() {
                       <span className="text-gray-400">-</span>
                     )}
                   </td> */}
-                  <td className="py-3 px-4">{item.pd_sbox}</td>
 
                   {item.pd_status != "withdrawn" ? (
                     <td className="py-3 px-4 align-middle">
