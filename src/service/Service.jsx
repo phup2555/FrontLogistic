@@ -1,8 +1,8 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { checkAdmin } from "../utils/roleHelper";
-// const BaseURL = "https://api.lgstorageservice.com/api";
-const BaseURL = "http://localhost:3000/api";
+const BaseURL = "https://api.lgstorageservice.com/api";
+// const BaseURL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: BaseURL,
 });
@@ -145,6 +145,14 @@ export const LoginWeb = async (body) => {
   try {
     const response = await api.post(`/users/login`, body);
     console.log(response);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+export const getLocationMap = async (room_id, zone) => {
+  try {
+    const response = await api.get(`/room/locations/${room_id}/${zone}`);
     return response.data;
   } catch (error) {
     throw error;

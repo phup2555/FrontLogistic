@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useEffectEvent } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AddPdData,
   getZone,
@@ -7,6 +7,7 @@ import {
 } from "../service/Service";
 import Swal from "sweetalert2";
 import { getUserIdByLocalStorage } from "../utils/roleHelper";
+import { Link } from "react-router-dom";
 
 export default function AddStock({ fetchPdData }) {
   const baseurl = "http://27.254.143.210:3000/api/barcode/";
@@ -263,6 +264,19 @@ export default function AddStock({ fetchPdData }) {
             <h3 className="text-center text-xl font-semibold mb-6">
               ເພີ່ມຂໍ້ມູນພັດສະດຸ
             </h3>
+            {data.store.length > 0 && data.zone.length > 0 && (
+              <div className="my-2 w-full rounded-xl">
+                <Link
+                  to={`/WarehouseMap?room_id=${data.store}&zone=${data.zone}`}
+                  target="_blank"
+                  className="text-blue-600 underline text-sm"
+                >
+                  <button className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 w-full">
+                    ເບິ່ງແຜນທີ່ສາງ
+                  </button>
+                </Link>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block mb-1">ຊື່ລູກຄ້າ</label>
@@ -328,9 +342,10 @@ export default function AddStock({ fetchPdData }) {
                 </div>
               )}
 
-              {rows.length > 0 && (
+              {data.store.length > 0 && data.zone.length > 0 && (
                 <div>
-                  <label className="block mb-1">ແຖວ (Row)</label>
+                  {/* <label className="block mb-1">ແຖວ (Row)</label> */}
+                  <label className="block mb-1">ຊັ້ນ (Layer)</label>
                   <select
                     name="row"
                     value={data.row}
@@ -338,7 +353,7 @@ export default function AddStock({ fetchPdData }) {
                     required
                     className="w-full px-3 py-2 border rounded-md"
                   >
-                    <option value="">-- Row --</option>
+                    <option value="">-- Layer --</option>
                     {rows.map((r) => (
                       <option key={r.row_no} value={r.row_no}>
                         {r.row_no}
@@ -350,7 +365,8 @@ export default function AddStock({ fetchPdData }) {
 
               {slots.length > 0 && (
                 <div>
-                  <label className="block mb-1">Slot</label>
+                  {/* <label className="block mb-1">Slot</label> */}
+                  <label className="block mb-1">ແຖວ (Row)</label>
                   <select
                     name="slot"
                     value={data.slot}
@@ -367,7 +383,7 @@ export default function AddStock({ fetchPdData }) {
                     }}
                     className="w-full px-3 py-2 border rounded-md"
                   >
-                    <option value="">-- Slot --</option>
+                    <option value="">-- Row --</option>
                     {slots.map((s) => (
                       <option key={s.location_id} value={s.slot_no}>
                         {s.slot_no}
