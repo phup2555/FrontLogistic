@@ -61,8 +61,6 @@ export const getRow = async (zone_id) => {
   }
 };
 export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
-  console.log({ room_id });
-  console.log({ zone_id });
   try {
     const response = await api.get(
       `/room/slot/${room_id}/${zone_id}/${row_no}`
