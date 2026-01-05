@@ -1,8 +1,8 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { checkAdmin } from "../utils/roleHelper";
-const BaseURL = "https://api.lgstorageservice.com/api";
-// const BaseURL = "http://localhost:3000/api";
+// const BaseURL = "https://api.lgstorageservice.com/api";
+const BaseURL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: BaseURL,
 });
@@ -115,13 +115,14 @@ export const editProduct = async (productId, data) => {
   }
 };
 
-export const outStock = async (productId, docOut) => {
+export const outStock = async (productId, docOut, action) => {
   try {
     if (!checkAdmin()) {
       throw new Error("ທ່ານບໍ່ມີສິດໃນການດຳເນີນການນີ້");
     }
     const data = {
       docOut: docOut,
+      action: action,
     };
     const response = await api.patch(`/products/out/${productId}`, data);
     return response.data;
@@ -151,6 +152,15 @@ export const LoginWeb = async (body) => {
 export const getLocationMap = async (room_id, zone) => {
   try {
     const response = await api.get(`/room/locations/${room_id}/${zone}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getLogs = async () => {
+  try {
+    const response = await api.get(`/logs/`);
     return response.data;
   } catch (error) {
     throw error;

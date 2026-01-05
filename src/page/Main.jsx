@@ -1,73 +1,95 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa"; // ตัวอย่าง icon
 
-const profiles = [
+const slides = [
   {
-    name: "Alice",
-    image: "https://www.focusglobal-logistics.com/uploads/7e4b5c.jpg",
+    image: "/images/PastedGraphic2.png",
+    title: "Fast Delivery",
   },
   {
-    name: "Bob",
-    image: "https://www.gccports.com/media/news-images/b8d5b-main-fml.jpg",
-  },
-  {
-    name: "Charlie",
-    image:
-      "https://mir-s3-cdn-cf.behance.net/project_modules/max_632_webp/56a4c225259223.563434dcc95e9.jpg",
+    image: "/images/SECUREDATASTORAGE.png",
+    title: "Secure Storage",
   },
 ];
 
 const Main = () => {
-  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
-  // Auto slide ทุก 3 วินาที
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === profiles.length - 1 ? 0 : prev + 1));
-    }, 2000); // 3000ms = 3 วินาที
+      handleNext();
+    }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentIndex]);
 
-  const handleLogin = () => {
-    navigate("/login");
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-sm flex flex-col items-center">
-        <img
-          src={profiles[currentIndex].image}
-          alt={profiles[currentIndex].name}
-          className="w-32 h-32 rounded-full mb-4 object-cover"
-        />
+    <div className="relative w-full h-screen overflow-hidden bg-gray-100">
+      {slides.map((slide, index) => (
+        <div
+          key={index}
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+            index === currentIndex ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <img
+            src={slide.image}
+            alt={slide.title}
+            className="w-full h-full object-cover"
+          />
+          {/* Overlay ปรับให้อ่านข้อความง่ายขึ้น */}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+      ))}
 
-        {/* Name */}
-        <h2 className="text-xl font-semibold mb-4">
-          {profiles[currentIndex].name}
-        </h2>
+      <div className="relative z-10 flex flex-col justify-center h-full px-10 md:px-20 text-white">
+        <div className="max-w-xl">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 transition-all duration-700 transform">
+            {slides[currentIndex].title}
+          </h1>
+          <div className="w-20 h-1.5 bg-blue-500 mb-8 rounded-full" />
 
-        {/* Indicators */}
-        <div className="flex space-x-2 mb-4">
-          {profiles.map((_, idx) => (
-            <span
-              key={idx}
-              className={`w-3 h-3 rounded-full ${
-                idx === currentIndex ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            ></span>
-          ))}
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-semibold transition-transform active:scale-95 shadow-lg"
+          >
+            Get Started
+          </button>
         </div>
 
-        {/* Login Button */}
-        <button
-          onClick={handleLogin}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Login
-        </button>
+        <div className="flex gap-3 mt-12">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`h-2 transition-all duration-300 rounded-full ${
+                idx === currentIndex ? "w-12 bg-white" : "w-3 bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
       </div>
+
+      <button
+        onClick={handlePrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/30 text-white transition-all"
+      >
+        ❮
+      </button>
+      <button
+        onClick={handleNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/30 text-white transition-all"
+      >
+        ❯
+      </button>
     </div>
   );
 };

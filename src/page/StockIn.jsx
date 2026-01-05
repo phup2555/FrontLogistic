@@ -58,7 +58,7 @@ export default function StockIn() {
       });
 
       if (!isConfirmed || !docOut) return;
-
+      const action = "OutStock";
       Swal.fire({
         title: "ກຳລັງນຳອອກ...",
         text: "ກະລຸນາລໍຖ້າສັກຄູ່...",
@@ -66,7 +66,7 @@ export default function StockIn() {
         didOpen: () => Swal.showLoading(),
       });
 
-      const res = await outStock(item.pd_id, docOut);
+      const res = await outStock(item.pd_id, docOut, action);
       fetchPdData();
       Swal.close();
 

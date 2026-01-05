@@ -1,429 +1,269 @@
-import React, { useEffect, useState } from "react";
-import { Button, Input, Pagination } from "antd";
-// import { PdDatasHistory } from "../service/Service";
-import { useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Input, Pagination, DatePicker } from "antd";
 import { IoMdSearch } from "react-icons/io";
-import { DatePicker, Select } from "antd";
 import XLSX from "xlsx-js-style";
 import moment from "moment";
+import { getLogs } from "../service/Service";
+
+const { RangePicker } = DatePicker;
+
 export default function Report() {
-  // const [PdData, setPdData] = useState([]);
-  // const [searchTerm, setSearchTerm] = useState("");
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 6;
-  // const { RangePicker } = DatePicker;
-  // const { Option } = Select;
-  // const [dateRange, setDateRange] = useState(null);
-  // const [statusFilter, setStatusFilter] = useState("0");
-  // const baseurl = "http://localhost:4000/public";
-  // const inputRef = useRef(null);
-  // const fetchPdData = async () => {
-  //   try {
-  //     const response = await PdDatasHistory();
-  //     setPdData(response);
-  //   } catch (error) {
-  //     console.error("Cannot get all product data:", error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   fetchPdData();
-  // }, []);
-  // useEffect(() => {
-  //   inputRef.current.focus();
-  // });
-  // const filteredSearchData = PdData.filter((item) => {
-  //   const lowerSearch = searchTerm.toLowerCase();
+  const [logs, setLogs] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [dateRange, setDateRange] = useState(null);
 
-  //   // search
-  //   const matchesSearch =
-  //     item.pd_customer_name?.toLowerCase().includes(lowerSearch) ||
-  //     item.pd_SBox?.toLowerCase().includes(lowerSearch) ||
-  //     item.pd_customer_No_box?.toLowerCase().includes(lowerSearch) ||
-  //     item.barcode?.split("/barcodes/").includes(searchTerm);
+  const itemsPerPage = 10;
+  const inputRef = useRef(null);
+  console.log({ logs });
+  const fetchLogs = async () => {
+    try {
+      const res = await getLogs();
+      setLogs(res.data);
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
 
-  //   // date filter
-  //   let matchesDate = true;
-  //   if (dateRange && dateRange.length === 2) {
-  //     const start = dateRange[0].startOf("day").toDate();
-  //     const end = dateRange[1].endOf("day").toDate();
+  useEffect(() => {
+    fetchLogs();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
-  //     const incoming = item.create_date ? new Date(item.create_date) : null;
-  //     const out = item.create_date ? new Date(item.create_date) : null;
+  // --- Filtering Logic ---
+  const filteredSearchData = logs.filter((item) => {
+    const lowerSearch = searchTerm.toLowerCase();
 
-  //     matchesDate =
-  //       (incoming && incoming >= start && incoming <= end) ||
-  //       (out && out >= start && out <= end);
-  //   }
+    // 1. Search Filter (แก้ชื่อ field ตาม data จริงของคุณ)
+    const matchesSearch =
+      (item.action && item.action.toLowerCase().includes(lowerSearch)) ||
+      (item.username && item.username.toLowerCase().includes(lowerSearch)) ||
+      (item.details && item.details.toLowerCase().includes(lowerSearch));
 
-  //   // status filter
-  //   const status = Number(statusFilter);
-  //   const itemStatus = Number(item.pd_status);
+    // 2. Date Filter
+    let matchesDate = true;
+    if (dateRange && dateRange.length === 2) {
+      const start = dateRange[0].startOf("day").toDate();
+      const end = dateRange[1].endOf("day").toDate();
 
-  //   let matchesStatus = true;
-  //   if (status === 1) {
-  //     matchesStatus = itemStatus === 1;
-  //   } else if (status === 2) {
-  //     matchesStatus = itemStatus === 2;
-  //   } else if (status === 0) {
-  //     matchesStatus = true;
-  //   }
+      // แก้ item.created_at เป็น field วันที่จริงของคุณ
+      const logDate = item.created_at ? new Date(item.created_at) : null;
 
-  //   // return แต่ละตัว filter แยกอิสระ
-  //   return matchesSearch && matchesDate && matchesStatus;
-  // });
+      matchesDate = logDate && logDate >= start && logDate <= end;
+    }
 
-  // const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
-  // const startIndex = (currentPage - 1) * itemsPerPage;
-  // console.log({ filteredSearchData });
-  // const paginatedData = filteredSearchData.slice(
-  //   startIndex,
-  //   startIndex + itemsPerPage
-  // );
+    return matchesSearch && matchesDate;
+  });
 
-  // const handleSearchChange = (e) => {
-  //   setSearchTerm(e.target.value);
-  //   setCurrentPage(1);
-  // };
+  // --- Pagination Logic ---
+  const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredSearchData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
-  // const exportToExcel = () => {
-  //   const title = "ລາຍງານສິນຄ້າໃນສາງ";
-  //   const subtitle = `ປະຈຳວັນທີ: ${new Date().toLocaleDateString("en-GB")}`;
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset ไปหน้า 1 เวลาค้นหา
+  };
 
-  //   const headers = [
-  //     "No",
-  //     "Company",
-  //     "NoBox",
-  //     "Sbox",
-  //     "Incoming Date",
-  //     "Doc_In",
-  //     "Out Date",
-  //     "Doc_Out",
-  //     "Create Date",
-  //     "Action",
-  //     "Status",
-  //   ];
+  // --- Excel Export ---
+  const exportToExcel = () => {
+    const title = "System Logs Report";
+    const subtitle = `Export Date: ${moment().format("DD/MM/YYYY")}`;
 
-  //   const dataRows = filteredSearchData.map((d, i) => {
-  //     console.log({ d });
-  //     const incoming = d.pd_incoming_date
-  //       ? new Date(d.pd_incoming_date).toLocaleDateString("en-GB")
-  //       : "";
-  //     const out = d.pd_out_date
-  //       ? new Date(d.pd_out_date).toLocaleDateString("en-GB")
-  //       : "";
-  //     const create = d.create_date
-  //       ? new Date(d.create_date).toLocaleDateString("en-GB")
-  //       : "";
-  //     const action =
-  //       d.action === "create"
-  //         ? "ນຳເຂົ້າ"
-  //         : d.action === "update"
-  //         ? "ແກ້ໄຂຂໍ້ມູນ"
-  //         : d.action === "outStock"
-  //         ? "ສິນຄ້ານຳອອກແລ້ວ"
-  //         : "";
-  //     const status =
-  //       d.pd_status == 1
-  //         ? "🟢 ຢູ່ໃນສາງ"
-  //         : d.pd_status == 2
-  //         ? "🔴 ນຳອອກແລ້ວ"
-  //         : "";
+    const headers = [
+      "No",
+      "Date/Time",
+      "User",
+      "Action",
+      "Details",
+      "IP Address", // ถ้ามี
+    ];
 
-  //     return [
-  //       i + 1,
-  //       d.pd_customer_name || "",
-  //       d.pd_customer_No_box || "",
-  //       d.pd_SBox || "",
-  //       incoming,
-  //       d.pd_Document || "",
-  //       out,
-  //       d.pd_Document_Out || "",
-  //       create,
-  //       action,
-  //       status,
-  //     ];
-  //   });
+    const dataRows = filteredSearchData.map((d, i) => {
+      return [
+        i + 1,
+        d.created_at ? moment(d.created_at).format("DD/MM/YYYY HH:mm:ss") : "-",
+        d.username || "Unknown",
+        d.action || "-",
+        d.details || "-",
+        d.ip_address || "-",
+      ];
+    });
 
-  //   const aoa = [];
-  //   aoa.push([]);
-  //   aoa.push([]);
-  //   aoa.push([]);
-  //   aoa.push([]);
-  //   aoa.push([title]); // A5
-  //   aoa.push([subtitle]); // A6
-  //   aoa.push([]); // A7
-  //   aoa.push(headers);
-  //   dataRows.forEach((r) => aoa.push(r));
+    // ... (Use same style logic as previous code) ...
+    const aoa = [[], [], [], [], [title], [subtitle], [], headers, ...dataRows];
 
-  //   const wb = XLSX.utils.book_new();
-  //   const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
 
-  //   // Merge Title & Subtitle
-  //   ws["!merges"] = [
-  //     { s: { r: 4, c: 0 }, e: { r: 4, c: 8 } }, // A5:I5
-  //     { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } }, // A6:I6
-  //   ];
+    // Merge Title
+    ws["!merges"] = [{ s: { r: 4, c: 0 }, e: { r: 4, c: 5 } }];
 
-  //   ws["!cols"] = [
-  //     { wpx: 40 },
-  //     { wpx: 180 },
-  //     { wpx: 120 },
-  //     { wpx: 100 },
-  //     { wpx: 120 },
-  //     { wpx: 120 },
-  //     { wpx: 120 },
-  //     { wpx: 140 },
-  //     { wpx: 150 },
-  //   ];
+    // Column Widths
+    ws["!cols"] = [
+      { wpx: 50 }, // No
+      { wpx: 150 }, // Date
+      { wpx: 120 }, // User
+      { wpx: 120 }, // Action
+      { wpx: 250 }, // Details
+      { wpx: 100 }, // IP
+    ];
 
-  //   // border reusable
-  //   const border = {
-  //     top: { style: "thin", color: { rgb: "FFDDDDDD" } },
-  //     bottom: { style: "thin", color: { rgb: "FFDDDDDD" } },
-  //     left: { style: "thin", color: { rgb: "FFDDDDDD" } },
-  //     right: { style: "thin", color: { rgb: "FFDDDDDD" } },
-  //   };
+    // Simple Style applying (simplified for brevity)
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[addr]) continue;
 
-  //   // Title & subtitle style
-  //   ws["A5"].s = {
-  //     font: { sz: 18, bold: true, color: { rgb: "FFFFFFFF" } },
-  //     fill: { patternType: "solid", fgColor: { rgb: "FF2563EB" } }, // blue
-  //     alignment: { horizontal: "center", vertical: "center" },
-  //   };
+        // Add borders to all cells
+        if (!ws[addr].s) ws[addr].s = {};
+        ws[addr].s.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
 
-  //   ws["A6"].s = {
-  //     font: { sz: 11, italic: true, color: { rgb: "FF374151" } },
-  //     alignment: { horizontal: "center", vertical: "center" },
-  //   };
+        // Header Style
+        if (R === 7) {
+          ws[addr].s.fill = { fgColor: { rgb: "FFCCCCCC" } };
+          ws[addr].s.font = { bold: true };
+          ws[addr].s.alignment = { horizontal: "center" };
+        }
+      }
+    }
 
-  //   // Header row style (row 8)
-  //   const headerRow = 7;
-  //   headers.forEach((_, c) => {
-  //     const addr = XLSX.utils.encode_cell({ r: headerRow, c });
-  //     if (!ws[addr]) return;
-  //     ws[addr].s = {
-  //       font: { bold: true, color: { rgb: "FFFFFFFF" } },
-  //       fill: { patternType: "solid", fgColor: { rgb: "FF111827" } }, // dark gray
-  //       alignment: { horizontal: "center", vertical: "center" },
-  //       border,
-  //     };
-  //   });
-
-  //   // Data rows style
-  //   const startData = 8;
-  //   dataRows.forEach((row, i) => {
-  //     row.forEach((cell, c) => {
-  //       const addr = XLSX.utils.encode_cell({ r: startData + i, c });
-  //       if (!ws[addr]) return;
-  //       ws[addr].s = {
-  //         font: { sz: 10 },
-  //         alignment: { horizontal: "center", vertical: "center" },
-  //         border,
-  //       };
-
-  //       // Incoming Date (green)
-  //       if (c === 4 && cell) {
-  //         ws[addr].s.fill = {
-  //           patternType: "solid",
-  //           fgColor: { rgb: "FFDCFCE7" },
-  //         };
-  //         ws[addr].s.font.color = { rgb: "FF065F46" };
-  //       }
-
-  //       // Out Date (red)
-  //       if (c === 5 && cell) {
-  //         ws[addr].s.fill = {
-  //           patternType: "solid",
-  //           fgColor: { rgb: "FFFEE2E2" },
-  //         };
-  //         ws[addr].s.font.color = { rgb: "FF7F1D1D" };
-  //       }
-
-  //       // Status
-  //       if (c === 8 && cell) {
-  //         if (cell.includes("ຢູ່ໃນສາງ")) {
-  //           ws[addr].s.fill = {
-  //             patternType: "solid",
-  //             fgColor: { rgb: "FFDCFCE7" },
-  //           };
-  //           ws[addr].s.font = {
-  //             color: { rgb: "FF0F5132" },
-  //             bold: true,
-  //           };
-  //         } else if (cell.includes("ນຳອອກແລ້ວ")) {
-  //           ws[addr].s.fill = {
-  //             patternType: "solid",
-  //             fgColor: { rgb: "FFFEE2E2" },
-  //           };
-  //           ws[addr].s.font = {
-  //             color: { rgb: "FF7F1D1D" },
-  //             bold: true,
-  //           };
-  //         }
-  //       }
-  //     });
-  //   });
-
-  //   XLSX.utils.book_append_sheet(wb, ws, "Report");
-  //   XLSX.writeFile(
-  //     wb,
-  //     `report_${new Date().toISOString().replace(/[:.]/g, "-")}.xlsx`
-  //   );
-  // };
+    XLSX.utils.book_append_sheet(wb, ws, "Logs");
+    XLSX.writeFile(wb, `System_Logs_${moment().format("YYYYMMDD_HHmm")}.xlsx`);
+  };
 
   return (
-    // <div className="p-4 sm:p-6">
-    //   <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
-    //     ປະຫວັດ (History)
-    //   </h1>
-    //   <div className="mb-6 flex justify-between items-center ">
-    //     <div className="flex gap-2 ">
-    //       <RangePicker
-    //         value={dateRange}
-    //         onChange={(dates) => setDateRange(dates)}
-    //         format="YYYY-MM-DD"
-    //         placeholder={["ວັນທີເລີມ", "ວັນທີສິ້ນສຸດ"]}
-    //       />
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
+        ລາຍງານປະຫວັດ (System Logs)
+      </h1>
 
-    //       <Select
-    //         value={statusFilter}
-    //         onChange={(value) => setStatusFilter(value)}
-    //         style={{ width: 150 }}
-    //         placeholder="ເລືອກສະຖານະ"
-    //         allowClear
-    //       >
-    //         <Option value="0">ທັງໝົດ</Option>
-    //         <Option value="1">ຢູ່ໃນສາງ</Option>
-    //         <Option value="2">ນຳອອກແລ້ວ</Option>
-    //       </Select>
-    //     </div>
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => setDateRange(dates)}
+            format="DD/MM/YYYY"
+            className="w-full sm:w-auto"
+            placeholder={["Start Date", "End Date"]}
+          />
+        </div>
 
-    //     <div className="relative w-full sm:w-[350px]">
-    //       <Input
-    //         placeholder="ຄົ້ນຫາ customer name, SBox, or No_box..."
-    //         ref={inputRef}
-    //         value={searchTerm}
-    //         onChange={handleSearchChange}
-    //         prefix={<IoMdSearch className="text-gray-500 text-lg" />}
-    //         allowClear
-    //       />
-    //     </div>
-    //   </div>
-    //   <div className="flex justify-end mb-1">
-    //     <Button
-    //       className="bg-[#928E85] hover:!bg-[#7a776f]"
-    //       type="primary"
-    //       onClick={exportToExcel}
-    //     >
-    //       Export to Excel
-    //     </Button>
-    //   </div>
-    //   <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
-    //     <table className="min-w-full bg-white divide-y divide-gray-200">
-    //       <thead className="bg-[#928E85] text-white text-center">
-    //         <tr>
-    //           <th className="py-3 px-4 font-medium">ບໍລິສັດ</th>
-    //           <th className="py-3 px-4 font-medium">ລະຫັດພັດສະດຸ</th>
-    //           <th className="py-3 px-4 font-medium">ລະຫັດ S/Box</th>
-    //           <th className="py-3 px-4 font-medium">ເຂົ້າສາງ</th>
-    //           <th className="py-3 px-4 font-medium">ເອກະສານຂາເຂົ້າ</th>
-    //           <th className="py-3 px-4 font-medium">ອອກສາງ</th>
-    //           <th className="py-3 px-4 font-medium">ເອກະສານຂາອອກ</th>
-    //           {/* <th className="py-3 px-4 font-medium">ບາໂຄດ</th> */}
-    //           <th className="py-3 px-4 font-medium">ວັນທີ່ປ່ຽນແປງ</th>
-    //           <th className="py-3 px-4 font-medium">ທຸລະກຳ</th>
-    //         </tr>
-    //       </thead>
+        <div className="relative w-full sm:w-[350px]">
+          <Input
+            placeholder="Search action, user, details..."
+            ref={inputRef}
+            value={searchTerm}
+            onChange={handleSearchChange}
+            prefix={<IoMdSearch className="text-gray-500 text-lg" />}
+            allowClear
+            className="rounded-md shadow-sm"
+          />
+        </div>
+      </div>
 
-    //       <tbody className="divide-y divide-gray-100">
-    //         {paginatedData.length === 0 ? (
-    //           <tr>
-    //             <td colSpan={9} className="text-center py-6 text-gray-500">
-    //               ບໍ່ພົບຂໍ້ມູນ
-    //             </td>
-    //           </tr>
-    //         ) : (
-    //           paginatedData.map((item) => (
-    //             <tr
-    //               key={item.pd_customer_No_box + item.pd_SBox}
-    //               className="text-center hover:bg-gray-50 transition duration-200"
-    //             >
-    //               <td className="py-3 px-4">{item.pd_customer_name}</td>
-    //               <td className="py-3 px-4">{item.pd_customer_No_box}</td>
-    //               <td className="py-3 px-4">{item.pd_SBox}</td>
-    //               <td className="py-3 px-4">
-    //                 {item.pd_incoming_date ? (
-    //                   <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-semibold">
-    //                     {new Date(item.pd_incoming_date).toLocaleDateString(
-    //                       "en-GB"
-    //                     )}
-    //                   </span>
-    //                 ) : (
-    //                   <span className="text-gray-400">-</span>
-    //                 )}
-    //               </td>
-    //               <td className="py-3 px-4">{item.pd_Document}</td>
-    //               <td className="py-3 px-4">
-    //                 {item.pd_out_date ? (
-    //                   <span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 font-semibold">
-    //                     {new Date(item.pd_out_date).toLocaleDateString("en-GB")}
-    //                   </span>
-    //                 ) : (
-    //                   <span className="text-gray-400">-</span>
-    //                 )}
-    //               </td>
-    //               <td className="py-3 px-4">{item.pd_Document_Out}</td>
-    //               {/* <td className="py-3 px-4 flex justify-center items-center">
-    //                 {item.pd_customer_No_box ? (
-    //                   <img
-    //                     src={`${baseurl}${item.barcode}`}
-    //                     alt={`barcode-${item.pd_customer_No_box}`}
-    //                     className="h-12 w-40"
-    //                   />
-    //                 ) : (
-    //                   <span className="text-gray-400">-</span>
-    //                 )}
-    //               </td> */}
-    //               <td className="py-3 px-4">
-    //                 {item.create_date ? (
-    //                   <span className="inline-block px-3 py-1 font-semibold">
-    //                     {moment(item.create_date).format("DD/MM/YYYY HH:mm")}
-    //                   </span>
-    //                 ) : (
-    //                   <span className="text-gray-400">-</span>
-    //                 )}
-    //               </td>
-    //               <td className="py-3 px-4">
-    //                 {item.action === "create"
-    //                   ? "ນຳເຂົ້າ"
-    //                   : item.action === "update"
-    //                   ? "ແກ້ໄຂຂໍ້ມູນ"
-    //                   : item.action === "outStock"
-    //                   ? "ສິນຄ້ານຳອອກແລ້ວ"
-    //                   : ""}
-    //               </td>
-    //             </tr>
-    //           ))
-    //         )}
-    //       </tbody>
-    //     </table>
-    //   </div>{" "}
-    //   <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-2">
-    //     <p className="text-gray-600 text-base">
-    //       ໜ້າ {currentPage} of {totalPages || 1}
-    //     </p>
+      {/* --- Export Button --- */}
+      <div className="flex justify-end mb-3">
+        <Button
+          className="bg-green-600 hover:!bg-green-700 text-white border-none shadow-md flex items-center gap-2"
+          onClick={exportToExcel}
+        >
+          Export Excel
+        </Button>
+      </div>
 
-    //     <Pagination
-    //       current={currentPage}
-    //       total={filteredSearchData.length}
-    //       pageSize={itemsPerPage}
-    //       onChange={(page) => setCurrentPage(page)}
-    //       showSizeChanger={false}
-    //       className="flex justify-center"
-    //     />
-    //   </div>
-    // </div>
+      <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-200 bg-white">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-[#928E85] text-white text-center">
+            <tr>
+              <th className="py-3 px-4 text-center w-16">No.</th>
+              <th className="py-3 px-4 text-left">Date/Time</th>
+              <th className="py-3 px-4 text-left">User</th>
+              <th className="py-3 px-4 text-center">Action</th>
+              <th className="py-3 px-4 text-left">Details</th>
+            </tr>
+          </thead>
 
-    <div className="">report</div>
+          <tbody className="divide-y divide-gray-100">
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-gray-500">
+                  ບໍ່ພົບຂໍ່ມູນ (No Data Found)
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((item, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50 transition duration-150"
+                >
+                  <td className="py-3 px-4 text-center text-gray-500">
+                    {startIndex + index + 1}
+                  </td>
+                  <td className="py-3 px-4 text-gray-700 whitespace-nowrap">
+                    {item.created_at
+                      ? moment(item.created_at).format("DD/MM/YYYY HH:mm:ss")
+                      : "-"}
+                  </td>
+                  <td className="py-3 px-4 font-medium text-gray-800">
+                    {item.note || "System"}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        item.action === "create" || item.action === "insert"
+                          ? "bg-green-100 text-green-800"
+                          : item.action === "delete"
+                          ? "bg-red-100 text-red-800"
+                          : item.action === "update"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {item.action || "Unknown"}
+                    </span>
+                  </td>
+                  <td
+                    className="py-3 px-4 text-gray-600 max-w-xs truncate"
+                    title={item.user_id}
+                  >
+                    {item.details || "-"}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* --- Pagination Section --- */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+        <p className="text-gray-600 text-sm">
+          Showing {startIndex + 1} to{" "}
+          {Math.min(startIndex + itemsPerPage, filteredSearchData.length)} of{" "}
+          {filteredSearchData.length} entries
+        </p>
+
+        <Pagination
+          current={currentPage}
+          total={filteredSearchData.length}
+          pageSize={itemsPerPage}
+          onChange={(page) => setCurrentPage(page)}
+          showSizeChanger={false}
+          className="shadow-sm rounded-md bg-white p-1"
+        />
+      </div>
+    </div>
   );
 }

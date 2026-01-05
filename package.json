@@ -17,6 +17,7 @@
     "axios": "^1.12.2",
     "faicon": "^1.1.0",
     "jwt-decode": "^3.1.2",
+    "lucide-react": "^0.562.0",
     "moment": "^2.30.1",
     "react": "^19.1.1",
     "react-barcode-scanner": "^4.0.0",
