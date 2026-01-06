@@ -10,7 +10,7 @@ import { getUserIdByLocalStorage } from "../utils/roleHelper";
 import { Link } from "react-router-dom";
 
 export default function AddStock({ fetchPdData }) {
-  const baseurl = "http://27.254.143.210:3000/api/barcode/";
+  const baseurl = "https://api.lgstorageservice.com/api/barcode/";
   const user_id = getUserIdByLocalStorage();
 
   // state เปิด/ปิด modal
@@ -186,7 +186,7 @@ export default function AddStock({ fetchPdData }) {
       fetchPdData();
 
       handleClose();
-
+      console.log({ res });
       if (res?.barcode) {
         const printConfirm = await Swal.fire({
           title: "ສຳເລັດ",

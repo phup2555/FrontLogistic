@@ -23,6 +23,7 @@ export const checkAdmin = () => {
   const role = getRoleFromToken();
   return role === "LogisAdminnn";
 };
+console.log({ checkAdmin });
 export function getUserIdByLocalStorage() {
   try {
     const user_id = localStorage.getItem("user_id");

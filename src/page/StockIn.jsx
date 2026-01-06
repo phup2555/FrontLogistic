@@ -26,7 +26,7 @@ export default function StockIn() {
   const inputRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState("ທັງໝົດ");
   const user_id = localStorage.getItem("user_id");
-  // const baseurl = "http://27.254.143.210:3000/api/barcode/";
+  const baseurl = "https://api.lgstorageservice.com/api/barcode/";
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
@@ -323,7 +323,7 @@ export default function StockIn() {
       </h1>
 
       <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        {checkAdmin && (
+        {checkAdmin() && (
           <div className="">
             <AddStock onAdded={editdata} fetchPdData={fetchPdData} />
           </div>
@@ -363,13 +363,15 @@ export default function StockIn() {
       </div>
 
       <div className="flex justify-end mb-2">
-        <Button
-          className="bg-[#928E85] hover:!bg-[#7a776f]"
-          type="primary"
-          onClick={exportToExcel}
-        >
-          ສ້າງໄຟລExcel
-        </Button>
+        {checkAdmin() && (
+          <Button
+            className="bg-[#928E85] hover:!bg-[#7a776f]"
+            type="primary"
+            onClick={exportToExcel}
+          >
+            ສ້າງໄຟລExcel
+          </Button>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
@@ -384,7 +386,7 @@ export default function StockIn() {
               <th className="py-3 px-4 font-medium">ເອກະສານຂາເຂົ້າ</th>
               <th className="py-3 px-4 font-medium">ອອກສາງ</th>
               <th className="py-3 px-4 font-medium">ເອກະສານຂາອອກ</th>
-              {/* <th className="py-3 px-4 font-medium">ບາໂຄດ</th> */}
+              <th className="py-3 px-4 font-medium">ບາໂຄດ</th>
               <th className="py-3 px-4 font-medium">ຈັດການ</th>
             </tr>
           </thead>
@@ -435,7 +437,7 @@ export default function StockIn() {
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  {/* <td className="py-3 px-4 flex justify-center items-center">
+                  <td className="py-3 px-4 flex justify-center items-center">
                     {item.pd_customer_No_box ? (
                       <img
                         src={`${baseurl}${item.barcode}`}
@@ -445,12 +447,12 @@ export default function StockIn() {
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
-                  </td> */}
+                  </td>
 
                   {item.pd_status != "withdrawn" ? (
                     <td className="py-3 px-4 align-middle">
                       <div className="flex gap-2 justify-center items-center h-full">
-                        {checkAdmin && (
+                        {checkAdmin() && (
                           <Button
                             type="primary"
                             size="small"
@@ -463,7 +465,7 @@ export default function StockIn() {
                             <RiFileEditFill className="text-white text-base" />
                           </Button>
                         )}
-                        {checkAdmin && (
+                        {checkAdmin() && (
                           <Button
                             type="primary"
                             size="small"
