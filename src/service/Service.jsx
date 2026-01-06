@@ -115,14 +115,22 @@ export const editProduct = async (productId, data) => {
   }
 };
 
-export const outStock = async (productId, docOut, action) => {
+export const outStock = async (
+  productId,
+  docOut,
+  pd_customer_No_box,
+  pd_customer_name,
+  user_id
+) => {
   try {
     if (!checkAdmin()) {
       throw new Error("ທ່ານບໍ່ມີສິດໃນການດຳເນີນການນີ້");
     }
     const data = {
       docOut: docOut,
-      action: action,
+      pd_customer_No_box: pd_customer_No_box,
+      pd_customer_name: pd_customer_name,
+      user_id: user_id,
     };
     const response = await api.patch(`/products/out/${productId}`, data);
     return response.data;

@@ -25,7 +25,7 @@ export default function StockIn() {
   const [scanOpen, setScanOpen] = useState(false);
   const inputRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState("ທັງໝົດ");
-
+  const user_id = localStorage.getItem("user_id");
   // const baseurl = "http://27.254.143.210:3000/api/barcode/";
   useEffect(() => {
     setCurrentPage(1);
@@ -58,7 +58,6 @@ export default function StockIn() {
       });
 
       if (!isConfirmed || !docOut) return;
-      const action = "OutStock";
       Swal.fire({
         title: "ກຳລັງນຳອອກ...",
         text: "ກະລຸນາລໍຖ້າສັກຄູ່...",
@@ -66,11 +65,17 @@ export default function StockIn() {
         didOpen: () => Swal.showLoading(),
       });
 
-      const res = await outStock(item.pd_id, docOut, action);
+      const res = await outStock(
+        item.pd_id,
+        docOut,
+        item.pd_customer_No_box,
+        item.pd_customer_name,
+        user_id
+      );
       fetchPdData();
       Swal.close();
-
-      if (res && res.status === 200) {
+      console.log({ res });
+      if (res && res === 1) {
         await Swal.fire({
           title: "ສຳເລັດ!",
           text: "ການນຳອອກສິນຄ້າສຳເລັດແລ້ວ",

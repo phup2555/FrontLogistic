@@ -67,22 +67,14 @@ export default function Report() {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset ไปหน้า 1 เวลาค้นหา
+    setCurrentPage(1);
   };
 
-  // --- Excel Export ---
   const exportToExcel = () => {
     const title = "System Logs Report";
     const subtitle = `Export Date: ${moment().format("DD/MM/YYYY")}`;
 
-    const headers = [
-      "No",
-      "Date/Time",
-      "User",
-      "Action",
-      "Details",
-      "IP Address", // ถ้ามี
-    ];
+    const headers = ["No", "Date/Time", "User", "Action", "Details"];
 
     const dataRows = filteredSearchData.map((d, i) => {
       return [
@@ -95,26 +87,22 @@ export default function Report() {
       ];
     });
 
-    // ... (Use same style logic as previous code) ...
     const aoa = [[], [], [], [], [title], [subtitle], [], headers, ...dataRows];
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(aoa);
 
-    // Merge Title
     ws["!merges"] = [{ s: { r: 4, c: 0 }, e: { r: 4, c: 5 } }];
 
-    // Column Widths
     ws["!cols"] = [
-      { wpx: 50 }, // No
-      { wpx: 150 }, // Date
-      { wpx: 120 }, // User
-      { wpx: 120 }, // Action
-      { wpx: 250 }, // Details
-      { wpx: 100 }, // IP
+      { wpx: 50 },
+      { wpx: 150 },
+      { wpx: 120 },
+      { wpx: 120 },
+      { wpx: 250 },
+      { wpx: 100 },
     ];
 
-    // Simple Style applying (simplified for brevity)
     const range = XLSX.utils.decode_range(ws["!ref"]);
     for (let R = range.s.r; R <= range.e.r; ++R) {
       for (let C = range.s.c; C <= range.e.c; ++C) {
@@ -142,7 +130,7 @@ export default function Report() {
     XLSX.utils.book_append_sheet(wb, ws, "Logs");
     XLSX.writeFile(wb, `System_Logs_${moment().format("YYYYMMDD_HHmm")}.xlsx`);
   };
-
+  console.log({ logs });
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
@@ -188,10 +176,10 @@ export default function Report() {
           <thead className="bg-[#928E85] text-white text-center">
             <tr>
               <th className="py-3 px-4 text-center w-16">No.</th>
-              <th className="py-3 px-4 text-left">Date/Time</th>
-              <th className="py-3 px-4 text-left">User</th>
+              <th className="py-3 px-4 text-center">Date/Time</th>
+              <th className="py-3 px-4 text-center">User</th>
               <th className="py-3 px-4 text-center">Action</th>
-              <th className="py-3 px-4 text-left">Details</th>
+              <th className="py-3 px-4 text-center">Details</th>
             </tr>
           </thead>
 
@@ -211,22 +199,23 @@ export default function Report() {
                   <td className="py-3 px-4 text-center text-gray-500">
                     {startIndex + index + 1}
                   </td>
-                  <td className="py-3 px-4 text-gray-700 whitespace-nowrap">
-                    {item.created_at
-                      ? moment(item.created_at).format("DD/MM/YYYY HH:mm:ss")
+                  <td className="py-3 px-4 text-gray-700 break-all">
+                    {item.action_date
+                      ? moment(item.action_date).format("DD/MM/YYYY HH:mm:ss")
                       : "-"}
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-800">
-                    {item.note || "System"}
+
+                  <td className="py-3 px-4 text-center font-medium text-gray-800">
+                    {item.username}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        item.action === "create" || item.action === "insert"
+                        item.action === "ADD"
                           ? "bg-green-100 text-green-800"
-                          : item.action === "delete"
+                          : item.action === "OutStock"
                           ? "bg-red-100 text-red-800"
-                          : item.action === "update"
+                          : item.action === "Edit product"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
@@ -234,11 +223,8 @@ export default function Report() {
                       {item.action || "Unknown"}
                     </span>
                   </td>
-                  <td
-                    className="py-3 px-4 text-gray-600 max-w-xs truncate"
-                    title={item.user_id}
-                  >
-                    {item.details || "-"}
+                  <td className="py-3 px-4 text-xs text-gray-600 break-all">
+                    {item.note || "-"}
                   </td>
                 </tr>
               ))

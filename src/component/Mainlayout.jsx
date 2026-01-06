@@ -97,27 +97,38 @@ export default function MainLayout({ children }) {
           }}
         />
         <div className="absolute bottom-0 left-0 w-full flex justify-center p-2">
-          <Button
-            type="primary"
-            danger
+          <button
             onClick={() => {
               navigate("/");
               localStorage.clear();
             }}
             className="
-      w-full 
-      bg-gradient-to-r from-red-600 to-red-500
-      hover:from-red-700 hover:to-red-600
-      text-white font-semibold
-      rounded-tl-xl rounded-tr-xl
-      shadow-md hover:shadow-lg
-      transition-all duration-300
-      py-5
-      border-none
-    "
+   group relative w-full py-5
+    text-white font-semibold
+    rounded-tl-xl rounded-tr-xl
+    overflow-hidden
+    shadow-md hover:shadow-lg
+  "
           >
-            Logout
-          </Button>
+            <span
+              className="
+      absolute inset-0
+      bg-gradient-to-r from-[#85837d] to-[#6e6c65]
+      transition-opacity duration-300
+      group-hover:opacity-0
+    "
+            />
+            <span
+              className="
+      absolute inset-0
+      bg-gradient-to-r from-[#6e6c65] to-[#59574e]
+      opacity-0
+      transition-opacity duration-300
+      group-hover:opacity-100
+    "
+            />
+            <span className="relative z-10">Logout</span>
+          </button>
         </div>
       </Sider>
 
