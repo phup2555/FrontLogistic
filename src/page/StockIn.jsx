@@ -135,6 +135,7 @@ export default function StockIn() {
 
     return matchesSearch && matchesStatus;
   });
+  console.log({ filteredSearchData });
 
   const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -153,40 +154,47 @@ export default function StockIn() {
 
     const headers = [
       "No",
-      "Company",
-      "NoBox",
-      "Sbox",
-      "Incoming Date",
-      "Doc_IN",
-      "Out Date",
-      "Doc_OUT",
-      "Status",
+      "pd_customer_name",
+      "pd_customer_No_box",
+      "pd_sbox",
+      "pd_incoming_date",
+      "pd_Document",
+      "location_id",
+      "pd_out_date",
+      "pd_Document_Out",
+      "pd_status",
+      "barcode",
     ];
 
     const dataRows = filteredSearchData.map((d, i) => {
-      const incoming = d.pd_incoming_date
-        ? new Date(d.pd_incoming_date).toLocaleDateString("en-GB")
-        : "";
-      const out = d.pd_out_date
-        ? new Date(d.pd_out_date).toLocaleDateString("en-GB")
-        : "";
+      const incoming = new Date(d.pd_incoming_date)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " "); // YYYY-MM-DD HH:MM:SS
+
+      const out = new Date(d.pd_out_date)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
       const status =
         d.pd_status == "in_storage"
-          ? "🟢 ຢູ່ໃນສາງ"
+          ? "in_storage"
           : d.pd_status == "withdrawn"
-          ? "🔴 ນຳອອກແລ້ວ"
+          ? "withdrawn"
           : "";
 
       return [
         i + 1,
-        d.pd_customer_name || "",
-        d.pd_customer_No_box || "",
-        d.pd_SBox || "",
+        d.pd_customer_name || "-",
+        d.pd_customer_No_box || "-",
+        d.pd_sbox || "-",
         incoming,
-        d.pd_Document || "",
+        d.pd_Document || "-",
+        d.location_id || "-",
         out,
-        d.pd_Document_Out || "",
+        d.pd_Document_Out || "-",
         status,
+        d.barcode,
       ];
     });
 
@@ -205,8 +213,8 @@ export default function StockIn() {
     const ws = XLSX.utils.aoa_to_sheet(aoa);
 
     ws["!merges"] = [
-      { s: { r: 4, c: 0 }, e: { r: 4, c: 8 } }, // A5:I5
-      { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } }, // A6:I6
+      { s: { r: 4, c: 0 }, e: { r: 4, c: 10 } },
+      { s: { r: 5, c: 0 }, e: { r: 5, c: 10 } },
     ];
 
     ws["!cols"] = [
@@ -219,9 +227,10 @@ export default function StockIn() {
       { wpx: 120 },
       { wpx: 140 },
       { wpx: 150 },
+      { wpx: 150 },
+      { wpx: 150 },
     ];
 
-    // border reusable
     const border = {
       top: { style: "thin", color: { rgb: "FFDDDDDD" } },
       bottom: { style: "thin", color: { rgb: "FFDDDDDD" } },
@@ -241,7 +250,6 @@ export default function StockIn() {
       alignment: { horizontal: "center", vertical: "center" },
     };
 
-    // Header row style (row 8)
     const headerRow = 7;
     headers.forEach((_, c) => {
       const addr = XLSX.utils.encode_cell({ r: headerRow, c });
@@ -276,7 +284,7 @@ export default function StockIn() {
         }
 
         // Out Date (red)
-        if (c === 6 && cell) {
+        if (c === 7 && cell) {
           ws[addr].s.fill = {
             patternType: "solid",
             fgColor: { rgb: "FFFEE2E2" },
@@ -286,7 +294,7 @@ export default function StockIn() {
 
         // Status
         if (c === 8 && cell) {
-          if (cell.includes("ຢູ່ໃນສາງ")) {
+          if (cell.includes("in_storage")) {
             ws[addr].s.fill = {
               patternType: "solid",
               fgColor: { rgb: "FFDCFCE7" },
@@ -295,7 +303,7 @@ export default function StockIn() {
               color: { rgb: "FF0F5132" },
               bold: true,
             };
-          } else if (cell.includes("ນຳອອກແລ້ວ")) {
+          } else if (cell.includes("withdrawn")) {
             ws[addr].s.fill = {
               patternType: "solid",
               fgColor: { rgb: "FFFEE2E2" },

@@ -17,26 +17,17 @@ const slides = [
   { image: "/images/sbox13.png", title: "ISO" },
 ];
 
-const SCROLL_THRESHOLD = 20;
+const SCROLL_THRESHOLD = 30;
 const LOCK_TIME = 900;
 
 const Main = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const isLocked = useRef(false);
-  const lastDirection = useRef(null);
+  const startY = useRef(0);
   const navigate = useNavigate();
 
-  const handleWheel = (e) => {
-    e.preventDefault();
-
+  const changeSlide = (direction) => {
     if (isLocked.current) return;
-    if (Math.abs(e.deltaY) < SCROLL_THRESHOLD) return;
-
-    const direction = e.deltaY > 0 ? "down" : "up";
-
-    if (lastDirection.current && lastDirection.current !== direction) return;
-
-    lastDirection.current = direction;
     isLocked.current = true;
 
     setCurrentIndex((prev) =>
@@ -47,14 +38,37 @@ const Main = () => {
 
     setTimeout(() => {
       isLocked.current = false;
-      lastDirection.current = null;
     }, LOCK_TIME);
+  };
+
+  // 🖱 Mouse / Trackpad
+  const handleWheel = (e) => {
+    e.preventDefault();
+    if (Math.abs(e.deltaY) < SCROLL_THRESHOLD) return;
+
+    changeSlide(e.deltaY > 0 ? "down" : "up");
+  };
+
+  // 📱 Touch
+  const handleTouchStart = (e) => {
+    startY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    const endY = e.changedTouches[0].clientY;
+    const diff = startY.current - endY;
+
+    if (Math.abs(diff) < 40) return;
+
+    changeSlide(diff > 0 ? "down" : "up");
   };
 
   return (
     <div
       onWheel={handleWheel}
-      className="relative w-full h-screen overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="relative w-full h-screen overflow-hidden touch-none"
     >
       {slides.map((slide, index) => (
         <div
@@ -73,9 +87,8 @@ const Main = () => {
           <img
             src={slide.image}
             alt={slide.title}
-            className="w-full h-full  object-center"
+            className="w-full h-full object-contain"
           />
-
           <div className="absolute inset-0 bg-black/40" />
         </div>
       ))}
