@@ -1,95 +1,101 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 const slides = [
-  {
-    image: "/images/PastedGraphic2.png",
-    title: "Fast Delivery",
-  },
-  {
-    image: "/images/SECUREDATASTORAGE.png",
-    title: "Secure Storage",
-  },
+  { image: "/images/sbox1.png", title: "Sbox" },
+  { image: "/images/sbox2.png", title: "Document storage" },
+  { image: "/images/sbox3.png", title: "Facility storage" },
+  { image: "/images/sbox4.png", title: "Facility storage" },
+  { image: "/images/sbox5.png", title: "Document storage" },
+  { image: "/images/sbox6.png", title: "Database backup" },
+  { image: "/images/sbox7.png", title: "Online document access" },
+  { image: "/images/sbox8.png", title: "Document hard copy recall" },
+  { image: "/images/sbox9.png", title: "ISO" },
+  { image: "/images/sbox10.png", title: "ISO" },
+  { image: "/images/sbox11.png", title: "ISO" },
+  { image: "/images/sbox12.png", title: "ISO" },
+  { image: "/images/sbox13.png", title: "ISO" },
 ];
+
+const SCROLL_THRESHOLD = 20;
+const LOCK_TIME = 900;
 
 const Main = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const isLocked = useRef(false);
+  const lastDirection = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      handleNext();
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [currentIndex]);
+  const handleWheel = (e) => {
+    e.preventDefault();
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
-  };
+    if (isLocked.current) return;
+    if (Math.abs(e.deltaY) < SCROLL_THRESHOLD) return;
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    const direction = e.deltaY > 0 ? "down" : "up";
+
+    if (lastDirection.current && lastDirection.current !== direction) return;
+
+    lastDirection.current = direction;
+    isLocked.current = true;
+
+    setCurrentIndex((prev) =>
+      direction === "down"
+        ? (prev + 1) % slides.length
+        : (prev - 1 + slides.length) % slides.length
+    );
+
+    setTimeout(() => {
+      isLocked.current = false;
+      lastDirection.current = null;
+    }, LOCK_TIME);
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gray-100">
+    <div
+      onWheel={handleWheel}
+      className="relative w-full h-screen overflow-hidden"
+    >
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentIndex ? "opacity-100" : "opacity-0"
-          }`}
+          className={`
+            absolute inset-0 transition-all duration-700 ease-in-out
+            ${
+              index === currentIndex
+                ? "opacity-100 translate-y-0 z-10"
+                : index < currentIndex
+                ? "opacity-0 -translate-y-24"
+                : "opacity-0 translate-y-24"
+            }
+          `}
         >
           <img
             src={slide.image}
             alt={slide.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full  object-center"
           />
-          {/* Overlay ปรับให้อ่านข้อความง่ายขึ้น */}
+
           <div className="absolute inset-0 bg-black/40" />
         </div>
       ))}
 
-      <div className="relative z-10 flex flex-col justify-center h-full px-10 md:px-20 text-white">
+      <div className="relative z-20 flex items-center h-full px-10 md:px-20 text-white pointer-events-none">
         <div className="max-w-xl">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 transition-all duration-700 transform">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
             {slides[currentIndex].title}
           </h1>
+
           <div className="w-20 h-1.5 bg-blue-500 mb-8 rounded-full" />
 
           <button
             onClick={() => navigate("/login")}
-            className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-semibold transition-transform active:scale-95 shadow-lg"
+            className="pointer-events-auto bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-semibold shadow-lg transition-all active:scale-95"
           >
             Get Started
           </button>
         </div>
-
-        <div className="flex gap-3 mt-12">
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`h-2 transition-all duration-300 rounded-full ${
-                idx === currentIndex ? "w-12 bg-white" : "w-3 bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
       </div>
-
-      <button
-        onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/30 text-white transition-all"
-      >
-        ❮
-      </button>
-      <button
-        onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/30 text-white transition-all"
-      >
-        ❯
-      </button>
     </div>
   );
 };
