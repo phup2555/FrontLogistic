@@ -15,7 +15,7 @@ export default function Report() {
 
   const itemsPerPage = 10;
   const inputRef = useRef(null);
-  console.log({ logs });
+
   const fetchLogs = async () => {
     try {
       const res = await getLogs();
@@ -130,7 +130,7 @@ export default function Report() {
     XLSX.utils.book_append_sheet(wb, ws, "Logs");
     XLSX.writeFile(wb, `System_Logs_${moment().format("YYYYMMDD_HHmm")}.xlsx`);
   };
-  console.log({ logs });
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">

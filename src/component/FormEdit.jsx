@@ -28,7 +28,7 @@ const FormEdit = ({ editdata, fetchPdData, popup }) => {
     try {
       setLoading(true);
       const res = await editProduct(editdata.pd_id, payload);
-      console.log({ res });
+
       if (res.data?.success) {
         Swal.fire({
           title: "ສຳເລັດ",

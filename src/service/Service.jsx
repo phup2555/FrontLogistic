@@ -17,7 +17,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
+      localStorage.clear();
       window.location.href = "/";
     }
     return Promise.reject(error);
@@ -65,7 +65,7 @@ export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
     const response = await api.get(
       `/room/slot/${room_id}/${zone_id}/${row_no}`
     );
-    console.log(response);
+
     return response.data;
   } catch (error) {
     console.log(error);
@@ -151,7 +151,6 @@ export const outStock = async (
 export const LoginWeb = async (body) => {
   try {
     const response = await api.post(`/users/login`, body);
-    console.log(response);
     return response.data;
   } catch (error) {
     throw error;

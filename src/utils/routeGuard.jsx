@@ -3,8 +3,9 @@ import { getRoleFromToken } from "./roleHelper";
 
 const ProtectedRoute = ({ allowRoles }) => {
   const role = getRoleFromToken();
+
   if (!role) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (!allowRoles.includes(role)) {

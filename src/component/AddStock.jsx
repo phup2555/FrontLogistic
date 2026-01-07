@@ -186,7 +186,7 @@ export default function AddStock({ fetchPdData }) {
       fetchPdData();
 
       handleClose();
-      console.log({ res });
+
       if (res?.barcode) {
         const printConfirm = await Swal.fire({
           title: "ສຳເລັດ",
@@ -206,7 +206,7 @@ export default function AddStock({ fetchPdData }) {
 
         if (printConfirm.isConfirmed) {
           const barcodeUrl = `${baseurl}${res.barcode}`;
-          console.log({ barcodeUrl });
+
           const iframe = document.createElement("iframe");
           iframe.style.display = "none";
           document.body.appendChild(iframe);

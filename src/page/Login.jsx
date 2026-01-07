@@ -12,7 +12,7 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       const response = await LoginWeb({ username: email, password: password });
-      console.log({ response });
+
       localStorage.setItem("token", response.token);
       localStorage.setItem("user_id", response.result.userId);
       Swal.fire({
@@ -31,7 +31,6 @@ const Login = () => {
       }
     } catch (error) {
       console.log("=== ERROR RAW ===", error);
-      console.log("=== ERROR RESPONSE ===", error.response);
 
       Swal.fire({
         icon: "error",
@@ -147,7 +146,7 @@ const Login = () => {
 
       <div className="hidden lg:flex w-2/3 flex-1 min-h-screen">
         <img
-          src="https://www.easywarehouse-thailand.com/wp-content/uploads/2024/01/pexels-tiger-lily-4483610_0-scaled.jpg"
+          src="/images/LoginPage.jpg"
           alt="Login Banner"
           className="w-full h-full object-cover brightness-50"
         />

@@ -15,7 +15,7 @@ export default function WarehouseMap() {
     if (!room_id || !zone) return;
     try {
       const res = await getLocationMap(room_id, zone);
-      console.log(res);
+
       setData(res.data);
     } catch (err) {
       console.error(err);

@@ -74,7 +74,7 @@ export default function StockIn() {
       );
       fetchPdData();
       Swal.close();
-      console.log({ res });
+
       if (res && res === 1) {
         await Swal.fire({
           title: "ສຳເລັດ!",
@@ -113,7 +113,7 @@ export default function StockIn() {
   useEffect(() => {
     fetchPdData();
   }, []);
-  console.log({ PdData });
+
   const status = statusFilter;
   const filteredSearchData = PdData.filter((item) => {
     const lowerSearch = searchTerm.toLowerCase();
@@ -142,7 +142,7 @@ export default function StockIn() {
     startIndex,
     startIndex + itemsPerPage
   );
-  console.log({ paginatedData });
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -520,7 +520,6 @@ export default function StockIn() {
             key={scanOpen ? "open" : "closed"}
             facingMode="environment"
             onSuccess={(result) => {
-              console.log("Scanned result:", result);
               setSearchTerm(result.trim());
               setScanOpen(false);
             }}
