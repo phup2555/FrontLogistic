@@ -1,8 +1,8 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { checkAdmin } from "../utils/roleHelper";
-const BaseURL = "https://api.lgstorageservice.com/api";
-// const BaseURL = "http://localhost:3000/api";
+// const BaseURL = "https://api.lgstorageservice.com/api";
+const BaseURL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: BaseURL,
 });
@@ -120,7 +120,8 @@ export const outStock = async (
   docOut,
   pd_customer_No_box,
   pd_customer_name,
-  user_id
+  user_id,
+  sbox
 ) => {
   try {
     if (!checkAdmin()) {
@@ -131,6 +132,7 @@ export const outStock = async (
       pd_customer_No_box: pd_customer_No_box,
       pd_customer_name: pd_customer_name,
       user_id: user_id,
+      sbox: sbox,
     };
     const response = await api.patch(`/products/out/${productId}`, data);
     return response.data;

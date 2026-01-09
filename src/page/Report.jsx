@@ -72,7 +72,7 @@ export default function Report() {
   const exportToExcel = () => {
     const title = "System Logs Report";
     const subtitle = `Export Date: ${moment().format("DD/MM/YYYY")}`;
-    const headers = ["No", "Date/Time", "User", "Action", "Details"];
+    const headers = ["No", "User", "Action", "Date", "Customer_No_box", "Note"];
 
     const dataRows = filteredSearchData.map((d, i) => [
       i + 1,

@@ -71,7 +71,8 @@ export default function StockIn() {
         docOut,
         item.pd_customer_No_box,
         item.pd_customer_name,
-        user_id
+        user_id,
+        item.pd_sbox
       );
       fetchPdData();
       Swal.close();
