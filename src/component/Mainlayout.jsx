@@ -96,7 +96,7 @@ export default function MainLayout({ children }) {
             if (mobileView) setSidebarVisible(false);
           }}
         />
-        <div className="absolute bottom-0 left-0 w-full flex justify-center p-2">
+        <div className="absolute bottom-2 left-0 w-full flex justify-center p-2">
           <button
             onClick={() => {
               navigate("/");
@@ -105,7 +105,7 @@ export default function MainLayout({ children }) {
             className="
    group relative w-full py-5
     text-white font-semibold
-    rounded-tl-xl rounded-tr-xl
+    rounded-xl 
     overflow-hidden
     shadow-md hover:shadow-lg
   "
@@ -127,7 +127,7 @@ export default function MainLayout({ children }) {
       group-hover:opacity-100
     "
             />
-            <span className="relative z-10">Logout</span>
+            <span className="relative z-10 text-xl">Logout</span>
           </button>
         </div>
       </Sider>

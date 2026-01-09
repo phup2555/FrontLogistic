@@ -342,6 +342,7 @@ export default function StockIn() {
       <head>
         <title>Print Barcode</title>
         <style>
+          @page { margin: 0; } /* ลดขอบหน้ากระดาษ */
           body {
             display: flex;
             flex-direction: column;
@@ -349,17 +350,30 @@ export default function StockIn() {
             align-items: center;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            height: 100vh;
+            page-break-inside: avoid; /* ป้องกัน split หน้า */
           }
-          img { width: 300px; margin-bottom: 10px; }
-          span { display: block; margin-bottom: 5px; font-weight: bold; }
+          img {
+            max-width: 90%;    /* ไม่เกินความกว้างหน้ากระดาษ */
+            max-height: 60vh;  /* ไม่เกินความสูงหน้ากระดาษ */
+            object-fit: contain;
+            margin-bottom: 15px;
+          }
+          span {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 24px;
+            text-align: center;
+          }
         </style>
       </head>
       <body>
-        <img src="${baseurl}${item.barcode}" />
-        <span style="font-size:24px;">Customer:${item.pd_customer_name}</span>
-        <span style="font-size:28px;">Customer No${item.pd_customer_No_box}</span>
-        <span style="font-size:22px;">S Box: ${item.pd_sbox}</span>
+        <img src="${baseurl}${item.barcode}" alt="Barcode" />
+        <span>Customer: ${item.pd_customer_name}</span>
+        <span>Customer No: ${item.pd_customer_No_box}</span>
+        <span>S Box: ${item.pd_sbox}</span>
       </body>
     </html>
   `);
