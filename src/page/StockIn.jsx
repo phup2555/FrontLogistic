@@ -12,7 +12,7 @@ import { BarcodeScanner } from "@thewirv/react-barcode-scanner";
 
 import { IoMdSearch } from "react-icons/io";
 import { RiFileEditFill } from "react-icons/ri";
-import { AiOutlineCheck } from "react-icons/ai";
+import { AiOutlineCheck, AiOutlinePrinter } from "react-icons/ai";
 import Swal from "sweetalert2";
 import { checkAdmin } from "../utils/roleHelper";
 export default function StockIn() {
@@ -26,6 +26,7 @@ export default function StockIn() {
   const inputRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState("ທັງໝົດ");
   const user_id = localStorage.getItem("user_id");
+  const [printItem, setPrintItem] = useState(null);
   const baseurl = "https://api.lgstorageservice.com/api/barcode/";
   useEffect(() => {
     setCurrentPage(1);
@@ -323,6 +324,52 @@ export default function StockIn() {
       `report_${new Date().toISOString().replace(/[:.]/g, "-")}.xlsx`
     );
   };
+  const handlePrintBarcode = (item) => {
+    if (!item?.barcode) return;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+
+    doc.open();
+    doc.write(`
+    <html>
+      <head>
+        <title>Print Barcode</title>
+        <style>
+          body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+          }
+          img { width: 300px; margin-bottom: 10px; }
+          span { display: block; margin-bottom: 5px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <img src="${baseurl}${item.barcode}" />
+        <span style="font-size:24px;">Customer:${item.pd_customer_name}</span>
+        <span style="font-size:28px;">Customer No${item.pd_customer_No_box}</span>
+        <span style="font-size:22px;">S Box: ${item.pd_sbox}</span>
+      </body>
+    </html>
+  `);
+    doc.close();
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 100);
+  };
 
   return (
     <div className="p-4 sm:p-6">
@@ -460,6 +507,16 @@ export default function StockIn() {
                   {item.pd_status != "withdrawn" ? (
                     <td className="py-3 px-4 align-middle">
                       <div className="flex gap-2 justify-center items-center h-full">
+                        {checkAdmin() && (
+                          <Button
+                            type="primary"
+                            size="small"
+                            className="bg-green-600 hover:!bg-green-700 flex items-center gap-1 shadow-md"
+                            onClick={() => handlePrintBarcode(item)}
+                          >
+                            <AiOutlinePrinter className="text-white text-base" />
+                          </Button>
+                        )}
                         {checkAdmin() && (
                           <Button
                             type="primary"

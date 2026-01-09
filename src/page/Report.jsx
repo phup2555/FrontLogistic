@@ -1,20 +1,22 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button, Input, Pagination, DatePicker } from "antd";
+import { Button, Input, Pagination, DatePicker, Select } from "antd";
 import { IoMdSearch } from "react-icons/io";
 import XLSX from "xlsx-js-style";
 import moment from "moment";
 import { getLogs } from "../service/Service";
 
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 export default function Report() {
   const [logs, setLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState(null);
+  const [actionFilter, setActionFilter] = useState(""); // "" = All
+  const inputRef = useRef(null);
 
   const itemsPerPage = 10;
-  const inputRef = useRef(null);
 
   const fetchLogs = async () => {
     try {
@@ -27,38 +29,34 @@ export default function Report() {
 
   useEffect(() => {
     fetchLogs();
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (inputRef.current) inputRef.current.focus();
   }, []);
 
   // --- Filtering Logic ---
   const filteredSearchData = logs.filter((item) => {
     const lowerSearch = searchTerm.toLowerCase();
 
-    // 1. Search Filter (แก้ชื่อ field ตาม data จริงของคุณ)
+    // Search filter (เฉพาะ note และ username)
     const matchesSearch =
-      (item.action && item.action.toLowerCase().includes(lowerSearch)) ||
-      (item.username && item.username.toLowerCase().includes(lowerSearch)) ||
-      (item.details && item.details.toLowerCase().includes(lowerSearch));
+      (item.note && item.note.toLowerCase().includes(lowerSearch)) ||
+      (item.username && item.username.toLowerCase().includes(lowerSearch));
 
-    // 2. Date Filter
+    // Date filter
     let matchesDate = true;
     if (dateRange && dateRange.length === 2) {
       const start = dateRange[0].startOf("day").toDate();
       const end = dateRange[1].endOf("day").toDate();
-
-      // แก้ item.created_at เป็น field วันที่จริงของคุณ
-      const logDate = item.created_at ? new Date(item.created_at) : null;
-
+      const logDate = item.action_date ? new Date(item.action_date) : null;
       matchesDate = logDate && logDate >= start && logDate <= end;
     }
 
-    return matchesSearch && matchesDate;
+    // Action filter (จาก dropdown)
+    let matchesAction = true;
+    if (actionFilter) matchesAction = item.action === actionFilter;
+
+    return matchesSearch && matchesDate && matchesAction;
   });
 
-  // --- Pagination Logic ---
-  const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredSearchData.slice(
     startIndex,
@@ -70,30 +68,26 @@ export default function Report() {
     setCurrentPage(1);
   };
 
+  // --- Export Excel (เหมือนเดิม) ---
   const exportToExcel = () => {
     const title = "System Logs Report";
     const subtitle = `Export Date: ${moment().format("DD/MM/YYYY")}`;
-
     const headers = ["No", "Date/Time", "User", "Action", "Details"];
 
-    const dataRows = filteredSearchData.map((d, i) => {
-      return [
-        i + 1,
-        d.created_at ? moment(d.created_at).format("DD/MM/YYYY HH:mm:ss") : "-",
-        d.username || "Unknown",
-        d.action || "-",
-        d.details || "-",
-        d.ip_address || "-",
-      ];
-    });
+    const dataRows = filteredSearchData.map((d, i) => [
+      i + 1,
+      d.created_at ? moment(d.created_at).format("DD/MM/YYYY HH:mm:ss") : "-",
+      d.username || "Unknown",
+      d.action || "-",
+      d.details || "-",
+      d.ip_address || "-",
+    ]);
 
     const aoa = [[], [], [], [], [title], [subtitle], [], headers, ...dataRows];
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-
     ws["!merges"] = [{ s: { r: 4, c: 0 }, e: { r: 4, c: 5 } }];
-
     ws["!cols"] = [
       { wpx: 50 },
       { wpx: 150 },
@@ -108,8 +102,6 @@ export default function Report() {
       for (let C = range.s.c; C <= range.e.c; ++C) {
         const addr = XLSX.utils.encode_cell({ r: R, c: C });
         if (!ws[addr]) continue;
-
-        // Add borders to all cells
         if (!ws[addr].s) ws[addr].s = {};
         ws[addr].s.border = {
           top: { style: "thin" },
@@ -117,8 +109,6 @@ export default function Report() {
           left: { style: "thin" },
           right: { style: "thin" },
         };
-
-        // Header Style
         if (R === 7) {
           ws[addr].s.fill = { fgColor: { rgb: "FFCCCCCC" } };
           ws[addr].s.font = { bold: true };
@@ -137,26 +127,35 @@ export default function Report() {
         ລາຍງານປະຫວັດ (System Logs)
       </h1>
 
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex gap-2 w-full sm:w-auto">
-          <RangePicker
-            value={dateRange}
-            onChange={(dates) => setDateRange(dates)}
-            format="DD/MM/YYYY"
-            className="w-full sm:w-auto"
-            placeholder={["Start Date", "End Date"]}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <RangePicker
+          value={dateRange}
+          onChange={(dates) => setDateRange(dates)}
+          format="DD/MM/YYYY"
+          className="w-full sm:w-auto"
+          placeholder={["Start Date", "End Date"]}
+        />
+        <div className=" flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <Select
+            value={actionFilter}
+            onChange={(value) => setActionFilter(value)}
+            className="w-full sm:w-48"
+            placeholder="Filter by Action"
+            allowClear
+            options={[
+              { value: "ADD", label: "ADD" },
+              { value: "Edit product", label: "Edit product" },
+              { value: "OutStock", label: "OutStock" },
+            ]}
           />
-        </div>
-
-        <div className="relative w-full sm:w-[350px]">
           <Input
-            placeholder="Search action, user, details..."
+            placeholder="Search user, note..."
             ref={inputRef}
             value={searchTerm}
             onChange={handleSearchChange}
             prefix={<IoMdSearch className="text-gray-500 text-lg" />}
             allowClear
-            className="rounded-md shadow-sm"
+            className="rounded-md shadow-sm w-full sm:w-[300px]"
           />
         </div>
       </div>
@@ -171,18 +170,18 @@ export default function Report() {
         </Button>
       </div>
 
+      {/* --- Table --- */}
       <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-200 bg-white">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-[#928E85] text-white text-center">
             <tr>
-              <th className="py-3 px-4 text-center w-16">No.</th>
-              <th className="py-3 px-4 text-center">Date/Time</th>
-              <th className="py-3 px-4 text-center">User</th>
-              <th className="py-3 px-4 text-center">Action</th>
-              <th className="py-3 px-4 text-center">Details</th>
+              <th className="py-3 px-4 w-16">No.</th>
+              <th className="py-3 px-4">Date/Time</th>
+              <th className="py-3 px-4">User</th>
+              <th className="py-3 px-4">Action</th>
+              <th className="py-3 px-4">Details</th>
             </tr>
           </thead>
-
           <tbody className="divide-y divide-gray-100">
             {paginatedData.length === 0 ? (
               <tr>
@@ -204,7 +203,6 @@ export default function Report() {
                       ? moment(item.action_date).format("DD/MM/YYYY HH:mm:ss")
                       : "-"}
                   </td>
-
                   <td className="py-3 px-4 text-center font-medium text-gray-800">
                     {item.username}
                   </td>
@@ -233,7 +231,7 @@ export default function Report() {
         </table>
       </div>
 
-      {/* --- Pagination Section --- */}
+      {/* --- Pagination --- */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
         <p className="text-gray-600 text-sm">
           Showing {startIndex + 1} to{" "}
