@@ -17,18 +17,25 @@ const slides = [
   { image: "/images/sbox13.png", title: "ISO" },
 ];
 
-const SCROLL_THRESHOLD = 30;
-const LOCK_TIME = 900;
+// ===== ปรับค่าตรงนี้ได้ตามฟีล =====
+const SCROLL_THRESHOLD = 60; // ลากช้าได้
+const RESET_TIME = 140; // รอให้หยุด scroll
+const SCROLL_COOLDOWN = 700; // delay กันเบิ้ล
+// =================================
 
 const Main = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const isLocked = useRef(false);
-  const startY = useRef(0);
   const navigate = useNavigate();
 
+  const scrollSum = useRef(0);
+  const scrollTimeout = useRef(null);
+  const canScroll = useRef(true);
+  const startY = useRef(0);
+
   const changeSlide = (direction) => {
-    if (isLocked.current) return;
-    isLocked.current = true;
+    if (!canScroll.current) return;
+
+    canScroll.current = false;
 
     setCurrentIndex((prev) =>
       direction === "down"
@@ -37,28 +44,39 @@ const Main = () => {
     );
 
     setTimeout(() => {
-      isLocked.current = false;
-    }, LOCK_TIME);
+      canScroll.current = true;
+    }, SCROLL_COOLDOWN);
   };
 
-  // 🖱 Mouse / Trackpad
+  // 🖱 Mouse + Trackpad (Mac / Windows)
   const handleWheel = (e) => {
     e.preventDefault();
-    if (Math.abs(e.deltaY) < SCROLL_THRESHOLD) return;
+    if (!canScroll.current) return;
 
-    changeSlide(e.deltaY > 0 ? "down" : "up");
+    scrollSum.current += e.deltaY;
+
+    // ถ้าหยุดลาก → reset ค่า
+    clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      scrollSum.current = 0;
+    }, RESET_TIME);
+
+    if (Math.abs(scrollSum.current) < SCROLL_THRESHOLD) return;
+
+    changeSlide(scrollSum.current > 0 ? "down" : "up");
+    scrollSum.current = 0;
   };
 
-  // 📱 Touch
+  // 📱 Mobile / iPad
   const handleTouchStart = (e) => {
     startY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e) => {
-    const endY = e.changedTouches[0].clientY;
-    const diff = startY.current - endY;
+    if (!canScroll.current) return;
 
-    if (Math.abs(diff) < 40) return;
+    const diff = startY.current - e.changedTouches[0].clientY;
+    if (Math.abs(diff) < 50) return;
 
     changeSlide(diff > 0 ? "down" : "up");
   };
@@ -68,19 +86,19 @@ const Main = () => {
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative w-full h-screen overflow-hidden touch-none"
+      className="relative w-full h-screen overflow-hidden"
     >
       {slides.map((slide, index) => (
         <div
           key={index}
           className={`
-            absolute inset-0 transition-all duration-700 ease-in-out
+            absolute inset-0 transition-all duration-700 ease-out
             ${
               index === currentIndex
                 ? "opacity-100 translate-y-0 z-10"
                 : index < currentIndex
-                ? "opacity-0 -translate-y-24"
-                : "opacity-0 translate-y-24"
+                ? "opacity-0 -translate-y-32"
+                : "opacity-0 translate-y-32"
             }
           `}
         >
@@ -93,7 +111,7 @@ const Main = () => {
         </div>
       ))}
 
-      <div className="relative z-20 flex items-center h-full px-10 md:px-20 text-white pointer-events-none">
+      <div className="relative z-20 flex items-center h-full px-10 md:px-20 text-white">
         <div className="max-w-xl">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             {slides[currentIndex].title}
@@ -103,7 +121,7 @@ const Main = () => {
 
           <button
             onClick={() => navigate("/login")}
-            className="pointer-events-auto bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-semibold shadow-lg transition-all active:scale-95"
+            className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-semibold shadow-lg transition-all active:scale-95"
           >
             Get Started
           </button>

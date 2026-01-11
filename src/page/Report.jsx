@@ -155,7 +155,7 @@ export default function Report() {
             onChange={handleSearchChange}
             prefix={<IoMdSearch className="text-gray-500 text-lg" />}
             allowClear
-            className="rounded-md shadow-sm w-full sm:w-[300px]"
+            className="rounded-md shadow-sm w-full sm:w-[300px] text-base"
           />
         </div>
       </div>

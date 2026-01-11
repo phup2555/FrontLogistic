@@ -16,6 +16,7 @@
     "antd": "^5.28.0",
     "axios": "^1.12.2",
     "faicon": "^1.1.0",
+    "framer-motion": "^12.25.0",
     "jwt-decode": "^3.1.2",
     "lucide-react": "^0.562.0",
     "moment": "^2.30.1",

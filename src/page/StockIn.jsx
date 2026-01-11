@@ -329,61 +329,57 @@ export default function StockIn() {
     if (!item?.barcode) return;
 
     const iframe = document.createElement("iframe");
-    iframe.style.position = "absolute";
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
     iframe.style.width = "0";
     iframe.style.height = "0";
     iframe.style.border = "0";
     document.body.appendChild(iframe);
 
-    const doc = iframe.contentWindow.document;
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
 
     doc.open();
     doc.write(`
     <html>
       <head>
-        <title>Print Barcode</title>
         <style>
-          @page { margin: 0; } /* ลดขอบหน้ากระดาษ */
           body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            page-break-inside: avoid; /* ป้องกัน split หน้า */
+            font-family: Arial;
+            text-align: center;
+            padding: 20px;
           }
           img {
-            max-width: 90%;    /* ไม่เกินความกว้างหน้ากระดาษ */
-            max-height: 60vh;  /* ไม่เกินความสูงหน้ากระดาษ */
-            object-fit: contain;
-            margin-bottom: 15px;
+            max-width: 90%;
+            height: auto;
+            margin-bottom: 10px;
           }
-          span {
-            display: block;
-            margin-bottom: 8px;
+          div {
+            font-size: 18px;
             font-weight: bold;
-            font-size: 24px;
-            text-align: center;
           }
         </style>
       </head>
       <body>
-        <img src="${baseurl}${item.barcode}" alt="Barcode" />
-        <span>Customer: ${item.pd_customer_name}</span>
-        <span>Customer No: ${item.pd_customer_No_box}</span>
-        <span>S Box: ${item.pd_sbox}</span>
+        <img id="barcode" src="${baseurl}${item.barcode}" />
+        <div>${item.pd_customer_name}</div>
+        <div>${item.pd_customer_No_box}</div>
+        <div>${item.pd_sbox}</div>
       </body>
     </html>
   `);
     doc.close();
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 100);
+
+    const img = doc.getElementById("barcode");
+
+    img.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 500);
+    };
   };
 
   return (
@@ -427,7 +423,7 @@ export default function StockIn() {
             onChange={handleSearchChange}
             prefix={<IoMdSearch className="text-gray-500 text-lg" />}
             allowClear
-            className="w-full  md:w-[100px] lg:w-[200px] "
+            className="w-full  md:w-[100px] lg:w-[200px] text-base"
           />
         </div>
       </div>
