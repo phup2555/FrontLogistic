@@ -78,7 +78,7 @@ export default function MainLayout({ children }) {
         }}
       >
         <div className="text-center text-lg font-semibold p-4 truncate">
-          LOGISTIC
+          Sbox
         </div>
 
         <Menu
@@ -153,9 +153,7 @@ export default function MainLayout({ children }) {
               className="mr-2"
             />
 
-            <span className="font-semibold text-lg text-gray-700">
-              LOGISTIC
-            </span>
+            <span className="font-semibold text-lg text-gray-700">Sbox</span>
           </header>
         )}
 

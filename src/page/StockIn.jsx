@@ -395,7 +395,7 @@ export default function StockIn() {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto ml-auto">
           <Select
             value={statusFilter}
             onChange={(value) => setStatusFilter(value)}

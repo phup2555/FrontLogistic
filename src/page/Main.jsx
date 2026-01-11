@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const slides = [
@@ -17,11 +17,11 @@ const slides = [
   { image: "/images/sbox13.png", title: "ISO" },
 ];
 
-// ===== ปรับค่าตรงนี้ได้ตามฟีล =====
-const SCROLL_THRESHOLD = 60; // ลากช้าได้
-const RESET_TIME = 140; // รอให้หยุด scroll
-const SCROLL_COOLDOWN = 700; // delay กันเบิ้ล
-// =================================
+// ===== ปรับฟีลได้ =====
+const SCROLL_THRESHOLD = 60;
+const RESET_TIME = 140;
+const SCROLL_COOLDOWN = 700;
+// ======================
 
 const Main = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,13 +34,12 @@ const Main = () => {
 
   const changeSlide = (direction) => {
     if (!canScroll.current) return;
-
     canScroll.current = false;
 
     setCurrentIndex((prev) =>
       direction === "down"
-        ? (prev + 1) % slides.length
-        : (prev - 1 + slides.length) % slides.length
+        ? Math.min(prev + 1, slides.length - 1)
+        : Math.max(prev - 1, 0)
     );
 
     setTimeout(() => {
@@ -48,14 +47,13 @@ const Main = () => {
     }, SCROLL_COOLDOWN);
   };
 
-  // 🖱 Mouse + Trackpad (Mac / Windows)
+  // 🖱 Mouse / Trackpad
   const handleWheel = (e) => {
     e.preventDefault();
     if (!canScroll.current) return;
 
     scrollSum.current += e.deltaY;
 
-    // ถ้าหยุดลาก → reset ค่า
     clearTimeout(scrollTimeout.current);
     scrollTimeout.current = setTimeout(() => {
       scrollSum.current = 0;
@@ -67,7 +65,7 @@ const Main = () => {
     scrollSum.current = 0;
   };
 
-  // 📱 Mobile / iPad
+  // 📱 Touch
   const handleTouchStart = (e) => {
     startY.current = e.touches[0].clientY;
   };
@@ -81,6 +79,26 @@ const Main = () => {
     changeSlide(diff > 0 ? "down" : "up");
   };
 
+  // ⌨️ Keyboard
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!canScroll.current) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        changeSlide("down");
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        changeSlide("up");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div
       onWheel={handleWheel}
@@ -88,6 +106,7 @@ const Main = () => {
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-screen overflow-hidden"
     >
+      {/* SLIDES */}
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -111,9 +130,22 @@ const Main = () => {
         </div>
       ))}
 
+      {/* CONTENT */}
       <div className="relative z-20 flex items-center h-full px-10 md:px-20 text-white">
         <div className="max-w-xl">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+          <h1
+            className="
+    text-[clamp(2.8rem,6vw,4.5rem)]
+    font-semibold
+    tracking-tight
+    leading-[1.2]
+    py-1
+    mb-6
+    bg-gradient-to-r from-white to-blue-200
+    bg-clip-text text-transparent
+    drop-shadow
+  "
+          >
             {slides[currentIndex].title}
           </h1>
 
@@ -126,6 +158,34 @@ const Main = () => {
             Get Started
           </button>
         </div>
+      </div>
+
+      {/* SLIDE INDICATOR */}
+      <div className="absolute right-6 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentIndex(i)}
+            className={`w-3 h-3 rounded-full transition-all
+              ${i === currentIndex ? "bg-white scale-125" : "bg-white/40"}
+            `}
+          />
+        ))}
+      </div>
+
+      {/* HINT */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 text-white/70 text-sm flex items-center gap-2">
+        <span>Scroll / Swipe / ↑ ↓</span>
+      </div>
+
+      {/* PROGRESS BAR */}
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-30">
+        <div
+          className="h-full bg-blue-500 transition-all"
+          style={{
+            width: `${((currentIndex + 1) / slides.length) * 100}%`,
+          }}
+        />
       </div>
     </div>
   );
