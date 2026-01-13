@@ -15,6 +15,7 @@ import { RiFileEditFill } from "react-icons/ri";
 import { AiOutlineCheck, AiOutlinePrinter } from "react-icons/ai";
 import Swal from "sweetalert2";
 import { checkAdmin } from "../utils/roleHelper";
+import socket from "../socket";
 export default function StockIn() {
   const [PdData, setPdData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -381,7 +382,11 @@ export default function StockIn() {
       }, 500);
     };
   };
-
+  useEffect(() => {
+    socket.on("product_added", (data) => {
+      setPdData((prev) => [data, ...prev]);
+    });
+  }, [socket]);
   return (
     <div className="p-4 sm:p-6">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
