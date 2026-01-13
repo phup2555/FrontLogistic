@@ -5,11 +5,7 @@ import AddStock from "../component/AddStock";
 import FormEdit from "../component/FormEdit";
 import XLSX from "xlsx-js-style";
 import { useRef } from "react";
-// import BarcodeScannerComponent from "react-qr-barcode-scanner";
-// import { BarcodeScanner } from "react-barcode-scanner";
-// import "react-barcode-scanner/polyfill";
 import { BarcodeScanner } from "@thewirv/react-barcode-scanner";
-
 import { IoMdSearch } from "react-icons/io";
 import { RiFileEditFill } from "react-icons/ri";
 import { AiOutlineCheck, AiOutlinePrinter } from "react-icons/ai";
