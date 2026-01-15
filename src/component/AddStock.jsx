@@ -10,7 +10,7 @@ import { getUserIdByLocalStorage } from "../utils/roleHelper";
 import { Link } from "react-router-dom";
 
 export default function AddStock({ fetchPdData }) {
-  const baseurl = "https://api.lgstorageservice.com/api/barcode/";
+  const baseurl = "https://api.sboxlaos.com/api/barcode/";
   const user_id = getUserIdByLocalStorage();
 
   // state เปิด/ปิด modal

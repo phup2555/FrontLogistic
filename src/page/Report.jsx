@@ -143,9 +143,10 @@ export default function Report() {
             placeholder="Filter by Action"
             allowClear
             options={[
+              { value: "", label: "All" },
               { value: "ADD", label: "ADD" },
               { value: "Edit product", label: "Edit product" },
-              { value: "OutStock", label: "OutStock" },
+              { value: "Out Stock", label: "OutStock" },
             ]}
           />
           <Input

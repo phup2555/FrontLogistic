@@ -24,7 +24,7 @@ export default function StockIn() {
   const [statusFilter, setStatusFilter] = useState("ທັງໝົດ");
   const user_id = localStorage.getItem("user_id");
   const [printItem, setPrintItem] = useState(null);
-  const baseurl = "https://api.lgstorageservice.com/api/barcode/";
+  const baseurl = "https://api.sboxlaos.com/api/barcode/";
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
