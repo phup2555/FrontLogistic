@@ -37,6 +37,8 @@ export default function AddStock({ fetchPdData }) {
     { id: "4", name: "01" },
     { id: "5", name: "02" },
     { id: "6", name: "03" },
+    { id: "7", name: "04" },
+    { id: "8", name: "05" },
   ]);
 
   // state zones, rows, slots ดึงจาก API
@@ -248,6 +250,7 @@ export default function AddStock({ fetchPdData }) {
       setLoading(false);
     }
   };
+  const roomName = rooms.find((r) => r.id === data.store)?.name || "";
 
   return (
     <>
@@ -267,7 +270,7 @@ export default function AddStock({ fetchPdData }) {
             {data.store.length > 0 && data.zone.length > 0 && (
               <div className="my-2 w-full rounded-xl">
                 <Link
-                  to={`/WarehouseMap?room_id=${data.store}&zone=${data.zone}`}
+                  to={`/WarehouseMap?room_id=${data.store}&zone=${data.zone}&room_name=${roomName}`}
                   target="_blank"
                   className="text-blue-600 underline text-sm"
                 >

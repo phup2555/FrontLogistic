@@ -7,7 +7,8 @@ export default function WarehouseMap() {
   const [searchParams] = useSearchParams();
   const room_id = searchParams.get("room_id");
   const zone = searchParams.get("zone");
-
+  const room_name = searchParams.get("room_name");
+  console.log({ room_name });
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +39,7 @@ export default function WarehouseMap() {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4 w-full text-center  ">
-        ແຜນຜັງ ຫ້ອງ {room_id} ໂຊນ {zone}
+        ແຜນຜັງ ຫ້ອງ {room_name} ໂຊນ {zone}
       </h2>
       <table className="table-auto border-collapse border">
         <thead>
@@ -57,7 +58,7 @@ export default function WarehouseMap() {
               <td className="border px-2 py-1 font-bold">{row}</td>
               {slots.map((slot) => {
                 const slotData = data.find(
-                  (d) => d.row_no === row && d.slot_no === slot
+                  (d) => d.row_no === row && d.slot_no === slot,
                 );
                 return (
                   <td

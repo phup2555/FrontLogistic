@@ -1,8 +1,8 @@
 import Base from "antd/es/typography/Base";
 import axios, { Axios } from "axios";
 import { checkAdmin } from "../utils/roleHelper";
-// const BaseURL = "https://api.sboxlaos.com/api";
-const BaseURL = "http://localhost:3000/api";
+const BaseURL = "https://api.sboxlaos.com/api";
+// const BaseURL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: BaseURL,
 });
@@ -21,7 +21,7 @@ api.interceptors.response.use(
       window.location.href = "/";
     }
     return Promise.reject(error);
-  }
+  },
 );
 export const fetchAllPdLength = async () => {
   try {
@@ -63,7 +63,7 @@ export const getRow = async (zone_id) => {
 export const getCheckEmtrpSlot = async (room_id, zone_id, row_no) => {
   try {
     const response = await api.get(
-      `/room/slot/${room_id}/${zone_id}/${row_no}`
+      `/room/slot/${room_id}/${zone_id}/${row_no}`,
     );
 
     return response.data;
@@ -121,7 +121,7 @@ export const outStock = async (
   pd_customer_No_box,
   pd_customer_name,
   user_id,
-  sbox
+  sbox,
 ) => {
   try {
     if (!checkAdmin()) {
