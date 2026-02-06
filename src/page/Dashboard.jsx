@@ -13,7 +13,7 @@ export default function Dashboard() {
   const pdIn02 = pdIn.filter((item) => item.name === "02").length;
   const pdIn03 = pdIn.filter((item) => item.name === "03").length;
   const pdIn04 = pdIn.filter((item) => item.name === "04").length;
-
+  const pdIn05 = pdIn.filter((item) => item.name === "05").length;
   const AllPdLength = async () => {
     try {
       setLoadingAll(true);
@@ -103,6 +103,12 @@ export default function Dashboard() {
         <StatCard
           title={"ສິນຄ້າໃນຫ້ອງ 04"}
           count={pdIn04}
+          icon={<FaBoxArchive />}
+          loading={loadingIn}
+        />
+        <StatCard
+          title={"ສິນຄ້າໃນຫ້ອງ 05"}
+          count={pdIn05}
           icon={<FaBoxArchive />}
           loading={loadingIn}
         />
